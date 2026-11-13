@@ -71,7 +71,6 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
     var github by remember { mutableStateOf("") }
     var contact by remember { mutableStateOf("") }
     var selectedSkills by remember { mutableStateOf(setOf<String>()) }
-    var pyqSearch by remember { mutableStateOf("") }
 
     LazyColumn(modifier.fillMaxSize().padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
@@ -91,24 +90,6 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
                         Text("Registration: ${countdown(event.registrationDeadline)}", color = TextPrimary, fontSize = 12.sp)
                         Text("Sponsor tracks: ${event.sponsorTracks.joinToString()}", color = TextSecondary, fontSize = 12.sp)
                         Button(onClick = { openExternal(context, event.applyUrl) }) { Text("Apply Now") }
-                    }
-                }
-            }
-        }
-        item {
-            GlassCard {
-                Text("PYQ VAULT", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                OutlinedTextField(pyqSearch, { pyqSearch = it }, label = { Text("Search subject, code or semester") }, modifier = Modifier.fillMaxWidth())
-                state.pyqs.filter { paper ->
-                    val query = pyqSearch.trim()
-                    query.isBlank() || paper.subjectName.contains(query, true) || paper.courseCode.contains(query, true) || paper.semester.toString() == query
-                }.forEach { paper ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(paper.subjectName, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                            Text("${paper.courseCode} · semester ${paper.semester} · ${paper.year}", color = TextSecondary, fontSize = 12.sp)
-                        }
-                        Button(onClick = { openExternal(context, paper.pdfUrl) }) { Text("Open PDF") }
                     }
                 }
             }

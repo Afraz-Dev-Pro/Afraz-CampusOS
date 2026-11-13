@@ -35,7 +35,9 @@ data class DashboardState(
     val lowestAttendance: CourseEntity? = null,
     val pinnedTools: List<String> = listOf("Scan Notes", "Expense Tracker", "Pomodoro"),
     val showBatteryWarning: Boolean = false,
-    val batteryWarningDismissed: Boolean = false
+    val batteryWarningDismissed: Boolean = false,
+    val timetableAssetPath: String? = null,
+    val timetableAssetMime: String? = null
 )
 
 @HiltViewModel
@@ -71,7 +73,9 @@ class DashboardViewModel @Inject constructor(
             lowestAttendance = logged.minByOrNull { it.attendedClasses.toDouble() / it.totalClasses },
             pinnedTools = orderedPinnedTools(prefs[pinnedKey] ?: DEFAULT_PINNED.toSet()),
             showBatteryWarning = OemBatteryHelper.shouldShow(context),
-            batteryWarningDismissed = prefs[dismissedKey] ?: false
+            batteryWarningDismissed = prefs[dismissedKey] ?: false,
+            timetableAssetPath = context.getSharedPreferences("campusos_timetable", Context.MODE_PRIVATE).getString("path", null),
+            timetableAssetMime = context.getSharedPreferences("campusos_timetable", Context.MODE_PRIVATE).getString("mime", null)
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
 
