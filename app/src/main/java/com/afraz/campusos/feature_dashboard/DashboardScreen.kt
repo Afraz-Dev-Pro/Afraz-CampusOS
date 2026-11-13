@@ -4,6 +4,9 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
+import android.net.Uri
+import androidx.core.content.FileProvider
+import coil3.compose.AsyncImage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -85,6 +88,19 @@ fun DashboardScreen(
                 }
             }
         }
+        state.timetableAssetPath?.let { path -> item {
+            GlassCard {
+                Text("MY TIMETABLE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                if (state.timetableAssetMime?.startsWith("image/") == true) {
+                    AsyncImage(model = java.io.File(path), contentDescription = "Saved timetable", modifier = Modifier.fillMaxWidth().height(210.dp))
+                } else {
+                    Button(onClick = {
+                        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", java.io.File(path))
+                        context.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/pdf").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+                    }) { Text("Open timetable PDF") }
+                }
+            }
+        } }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 GlassCard(Modifier.weight(1f)) {

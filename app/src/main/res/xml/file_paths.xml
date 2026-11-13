@@ -1,5 +1,6 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <files-path name="campus_pdfs" path="pdfs/" />
     <files-path name="wallet_docs" path="wallet/" />
+    <files-path name="timetable_files" path="timetable/" />
     <cache-path name="shared_cache" path="shared/" />
 </paths>
