@@ -2,6 +2,8 @@
 
 CampusOS is an Android student super-app with application ID `com.afraz.campusos`. It uses Kotlin, Jetpack Compose, Room, Hilt, DataStore, Google Play services Document Scanner, native PDF generation, Retrofit/OkHttp, and Firebase's client SDK.
 
+The current release target is **v1.1.0** (`versionCode` 2).
+
 ## Build
 
 Open the project in Android Studio with JDK 17 or newer and Android SDK 35. On Windows, use `gradlew.bat`; on macOS/Linux, use `./gradlew`.
@@ -21,8 +23,10 @@ The app reads hackathon and PYQ JSON from the `BASE_URL` in `CommunityFeedApi.kt
 ## Included modules
 
 - Dashboard: next class, aggregate and lowest-subject attendance, three customizable pinned tools, 48-hour deadlines, and OEM battery guidance.
-- Academics: weekly timetable, compressed URL-safe share codes and QR import/export, attendance with undo and prediction, tasks, syllabus progress, and SGPA target prediction.
-- Toolkit: ML Kit scanning, local image/note PDFs, expense budgets, equal and custom UPI splits, offline document wallet, and Pomodoro service controls.
+- Academics: weekly timetable with image/PDF attachment, manual slots, compressed URL-safe share codes and QR import/export, attendance with undo and prediction, tasks, syllabus progress, SGPA target prediction, and searchable PYQ Vault.
+- Toolkit: ML Kit scanning, camera/photo multi-page PDFs, offline document wallet, and Pomodoro service controls.
+- Finance: personal spending, budgets, UPI, and bill splits.
+- Dashboard: timetable image preview and direct Finance and Digital ID shortcuts.
 - HackHub: paginated teammate requests, skill filters, cached JSON feeds with bundled seed data, PYQ links, lazy Google sign-in, and SAF backup/restore.
 - Android integrations: reboot-safe class/deadline alarms, Glance widget, and Quick Settings scan tile.
 
