@@ -5,6 +5,10 @@ import androidx.lifecycle.viewModelScope
 import android.content.Context
 import android.net.Uri
 import java.io.File
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.room.withTransaction
 import com.afraz.campusos.data.AppDatabase
 import com.afraz.campusos.data.AttendanceLogEntity
@@ -48,6 +52,7 @@ data class AcademicsState(
 class AcademicsViewModel @Inject constructor(
     private val database: AppDatabase,
     private val alarmScheduler: CampusAlarmScheduler,
+    private val settings: DataStore<Preferences>,
     private val feedRepository: CommunityFeedRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -84,8 +89,10 @@ class AcademicsViewModel @Inject constructor(
         val extension = when (mime) { "application/pdf" -> "pdf"; "image/png" -> "png"; "image/webp" -> "webp"; else -> "jpg" }
         val destination = File(directory, "timetable.$extension")
         context.contentResolver.openInputStream(uri)?.use { input -> destination.outputStream().use(input::copyTo) } ?: return@launch
-        context.getSharedPreferences("campusos_timetable", Context.MODE_PRIVATE).edit()
-            .putString("path", destination.absolutePath).putString("mime", mime).apply()
+        settings.edit { preferences ->
+            preferences[stringPreferencesKey("timetable_asset_path")] = destination.absolutePath
+            preferences[stringPreferencesKey("timetable_asset_mime")] = mime
+        }
     }
 
     fun addSlot(courseId: String, day: Int, startMinutes: Int, endMinutes: Int) = viewModelScope.launch(Dispatchers.IO) {
