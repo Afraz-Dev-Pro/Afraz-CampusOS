@@ -34,6 +34,7 @@ import com.afraz.campusos.feature_academics.AcademicsScreen
 import com.afraz.campusos.feature_dashboard.DashboardScreen
 import com.afraz.campusos.feature_hackhub.HackHubScreen
 import com.afraz.campusos.feature_toolkit.ToolkitScreen
+import com.afraz.campusos.feature_toolkit.FinanceScreen
 import com.afraz.campusos.feature_toolkit.tile.QuickScanTileService
 import com.afraz.campusos.navigation.CampusRoute
 import dagger.hilt.android.AndroidEntryPoint
@@ -63,7 +64,8 @@ class MainActivity : ComponentActivity() {
 private fun CampusShell(openScannerRequest: Boolean, onScannerConsumed: () -> Unit, onScannerRequested: () -> Unit) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
-    val currentRoute = backStack?.destination?.route
+    val destination = backStack?.destination
+    val currentRoute = destination?.route.orEmpty()
     LaunchedEffect(openScannerRequest) {
         if (openScannerRequest) navController.navigate(CampusRoute.Toolkit) { launchSingleTop = true }
     }
@@ -71,7 +73,8 @@ private fun CampusShell(openScannerRequest: Boolean, onScannerConsumed: () -> Un
         "Dashboard" to CampusRoute.Dashboard,
         "Academics" to CampusRoute.Academics,
         "Toolkit" to CampusRoute.Toolkit,
-        "HackHub" to CampusRoute.HackHub
+        "HackHub" to CampusRoute.HackHub,
+        "Finance" to CampusRoute.Finance
     )
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -84,7 +87,7 @@ private fun CampusShell(openScannerRequest: Boolean, onScannerConsumed: () -> Un
             ) {
                 NavigationBar(containerColor = androidx.compose.ui.graphics.Color.Transparent, tonalElevation = 0.dp) {
                     tabs.forEach { (label, route) ->
-                        val selected = currentRoute == route::class.qualifiedName || currentRoute?.contains(route::class.simpleName.orEmpty()) == true
+                        val selected = currentRoute.substringAfterLast('.').startsWith(route::class.simpleName.orEmpty())
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
@@ -107,7 +110,9 @@ private fun CampusShell(openScannerRequest: Boolean, onScannerConsumed: () -> Un
                 DashboardScreen(
                     onOpenToolkit = { navController.navigate(CampusRoute.Toolkit) { launchSingleTop = true } },
                     onOpenScanner = { navController.navigate(CampusRoute.Toolkit) { launchSingleTop = true }; onScannerRequested() },
-                    onOpenAcademics = { navController.navigate(CampusRoute.Academics) { launchSingleTop = true } }
+                    onOpenAcademics = { navController.navigate(CampusRoute.Academics) { launchSingleTop = true } },
+                    onOpenFinance = { navController.navigate(CampusRoute.Finance) { launchSingleTop = true } },
+                    onOpenDigitalId = { navController.navigate(CampusRoute.DigitalId) { launchSingleTop = true } }
                 )
             }
             composable<CampusRoute.Academics> { AcademicsScreen() }
@@ -115,6 +120,8 @@ private fun CampusShell(openScannerRequest: Boolean, onScannerConsumed: () -> Un
                 ToolkitScreen(autoStartScanner = openScannerRequest, onAutoStartConsumed = onScannerConsumed)
             }
             composable<CampusRoute.HackHub> { HackHubScreen() }
+            composable<CampusRoute.Finance> { FinanceScreen() }
+            composable<CampusRoute.DigitalId> { ToolkitScreen(walletOnly = true) }
         }
     }
 }
