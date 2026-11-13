@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">CampusOS</title>
+  <desc id="desc">Modern campus building in indigo and mint on a deep navy background</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#151A32"/>
+      <stop offset="1" stop-color="#090B16"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A5AEFF"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="64" fill="url(#bg)"/>
+  <circle cx="128" cy="148" r="76" fill="#6366F1" opacity=".12" filter="url(#glow)"/>
+  <path d="M48 104 128 57l80 47-80 13z" fill="url(#roof)"/>
+  <path d="M60 107h136v83H60z" fill="#F1F3FF"/>
+  <path d="M52 102h152v13H52z" fill="#B7BEFF"/>
+  <path d="M73 124h16v61H73zm35 0h16v61h-16zm35 0h16v61h-16zm35 0h16v61h-16z" fill="#747EF4"/>
+  <path d="M119 154h18v36h-18z" fill="#252A46"/>
+  <path d="M51 190h154v12H51zm14 14h126v9H65z" fill="#35D5C2"/>
+  <path d="M122 69h12v20h-12z" fill="#F1F3FF"/>
+  <circle cx="128" cy="53" r="4" fill="#35D5C2"/>
+</svg>
