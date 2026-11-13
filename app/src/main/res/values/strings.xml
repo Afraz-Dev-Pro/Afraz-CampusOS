@@ -1,0 +1,7 @@
+<resources>
+    <string name="google_web_client_id">CONFIGURE_WITH_FIREBASE_WEB_CLIENT_ID</string>
+    <string name="firebase_api_key">CONFIGURE_WITH_FIREBASE_API_KEY</string>
+    <string name="firebase_app_id">CONFIGURE_WITH_FIREBASE_APP_ID</string>
+    <string name="firebase_project_id">CONFIGURE_WITH_FIREBASE_PROJECT_ID</string>
+    <string name="firebase_sender_id">CONFIGURE_WITH_FIREBASE_SENDER_ID</string>
+</resources>
