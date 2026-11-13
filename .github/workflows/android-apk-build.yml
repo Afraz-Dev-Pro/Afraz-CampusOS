@@ -40,7 +40,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Compile and assemble
-        run: ./gradlew --no-daemon compileDebugKotlin assembleDebug
+        run: bash gradlew --no-daemon compileDebugKotlin assembleDebug
 
       - name: Verify APK signature and record checksum
         run: |
