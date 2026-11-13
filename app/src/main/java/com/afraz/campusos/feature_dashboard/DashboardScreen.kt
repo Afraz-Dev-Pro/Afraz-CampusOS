@@ -52,6 +52,8 @@ fun DashboardScreen(
     onOpenToolkit: () -> Unit,
     onOpenScanner: () -> Unit,
     onOpenAcademics: () -> Unit,
+    onOpenFinance: () -> Unit,
+    onOpenDigitalId: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -69,6 +71,15 @@ fun DashboardScreen(
             Spacer(Modifier.height(16.dp))
             Text("CAMPUSOS / STUDENT SPACE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             Text("Your campus, in one place", color = TextPrimary, fontSize = 27.sp, fontWeight = FontWeight.Bold)
+        }
+        item {
+            GlassCard {
+                Text("CAMPUS SHORTCUTS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = onOpenDigitalId, modifier = Modifier.weight(1f)) { Text("Digital ID") }
+                    Button(onClick = onOpenFinance, modifier = Modifier.weight(1f)) { Text("Finance") }
+                }
+            }
         }
         item {
             GlassCard {
@@ -125,6 +136,8 @@ fun DashboardScreen(
                         Button(onClick = when (tool) {
                             "Scan Notes" -> onOpenScanner
                             "Timetable", "Assignments" -> onOpenAcademics
+                            "Digital ID", "Digital Wallet" -> onOpenDigitalId
+                            "Expense Tracker", "Finance" -> onOpenFinance
                             else -> onOpenToolkit
                         }, modifier = Modifier.fillMaxWidth()) { Text(tool) }
                     }

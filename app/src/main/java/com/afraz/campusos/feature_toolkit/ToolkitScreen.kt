@@ -78,7 +78,7 @@ import java.util.Calendar
 import kotlin.math.max
 
 @Composable
-fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = false, onAutoStartConsumed: () -> Unit = {}, viewModel: ToolkitViewModel = hiltViewModel()) {
+fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = false, onAutoStartConsumed: () -> Unit = {}, financeOnly: Boolean = false, walletOnly: Boolean = false, viewModel: ToolkitViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsState()
     val haptics = LocalHapticFeedback.current
@@ -96,6 +96,8 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
     var groupAmount by remember { mutableStateOf("") }
     var customShares by remember { mutableStateOf("") }
     var selectedFriends by remember { mutableStateOf(setOf<String>()) }
+    var capturedPhotos by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
     val postNotificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) PomodoroForegroundService.sendAction(context, ACTION_START)
     }
@@ -120,6 +122,19 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(20)) { uris ->
         if (uris.isNotEmpty()) viewModel.createImagePdf(imagePdfTitle, uris)
     }
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
+        val captured = pendingCameraUri
+        if (saved && captured != null) capturedPhotos = capturedPhotos + captured
+        pendingCameraUri = null
+    }
+    val takePhoto: () -> Unit = {
+        val directory = File(context.cacheDir, "shared").apply { mkdirs() }
+        val photo = File(directory, "pdf-page-${System.currentTimeMillis()}.jpg")
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photo)
+        pendingCameraUri = uri
+        cameraLauncher.launch(uri)
+        Unit
+    }
     val documentPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { viewModel.importDocument(it, it.lastPathSegment?.substringAfterLast('/') ?: "Campus document") }
     }
@@ -141,10 +156,10 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
     LazyColumn(modifier.fillMaxSize().padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Spacer(Modifier.height(16.dp))
-            Text("Toolkit", color = TextPrimary, fontSize = 29.sp, fontWeight = FontWeight.Bold)
-            Text("Campus helpers that work offline.", color = TextSecondary)
+            Text(if (financeOnly) "Finance" else if (walletOnly) "Digital ID" else "Toolkit", color = TextPrimary, fontSize = 29.sp, fontWeight = FontWeight.Bold)
+            Text(if (financeOnly) "Personal spending, UPI and bill splits." else if (walletOnly) "Your campus documents, ready when you need them." else "Campus helpers that work offline.", color = TextSecondary)
         }
-        item {
+        if (!financeOnly && !walletOnly) item {
             GlassCard {
                 Text("DOCUMENT SCANNER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Text("Google Play services scans pages without a camera permission.", color = TextPrimary)
@@ -152,7 +167,7 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                 if (scanMessage.isNotBlank()) Text(scanMessage, color = TextSecondary)
             }
         }
-        item {
+        if (!financeOnly && !walletOnly) item {
             GlassCard {
                 Text("NATIVE PDF MAKER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(pdfTitle, { pdfTitle = it }, label = { Text("PDF title") }, modifier = Modifier.fillMaxWidth())
@@ -160,10 +175,18 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                 Button(onClick = { viewModel.createNotesPdf(pdfTitle.ifBlank { "Notes" }, noteText); pdfTitle = ""; noteText = "" }, enabled = noteText.isNotBlank()) { Text("Create A4 PDF from notes") }
                 OutlinedTextField(imagePdfTitle, { imagePdfTitle = it }, label = { Text("Image PDF title") }, modifier = Modifier.fillMaxWidth())
                 Button(onClick = { imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) { Text("Choose images and create PDF") }
+                Button(onClick = takePhoto) { Text("Take photo for PDF") }
+                if (capturedPhotos.isNotEmpty()) {
+                    Text("${capturedPhotos.size} photo(s) captured. Take more pages or create the PDF.", color = TextSecondary)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = { viewModel.createImagePdf(imagePdfTitle.ifBlank { "Scanned pages" }, capturedPhotos); capturedPhotos = emptyList() }) { Text("Create PDF from photos") }
+                        Button(onClick = { capturedPhotos = emptyList() }) { Text("Clear photos") }
+                    }
+                }
                 Button(onClick = { documentPicker.launch(arrayOf("application/pdf", "image/*")) }) { Text("Import PDF or ID document") }
             }
         }
-        item {
+        if (financeOnly) item {
             val monthStart = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
             val spent = state.expenses.filter { it.timestamp >= monthStart }.sumOf { it.amountPaise }
             GlassCard {
@@ -188,7 +211,7 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                 }
             }
         }
-        item {
+        if (financeOnly) item {
             GlassCard {
                 Text("FRIENDS & BILL SPLITTER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -231,7 +254,7 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                 }
             }
         }
-        item {
+        if (!financeOnly) item {
             GlassCard {
                 Text("DIGITAL ID & DOCUMENT WALLET", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Button(onClick = { documentPicker.launch(arrayOf("image/*", "application/pdf")) }) { Text("Add ID, pass or hall ticket") }
@@ -249,7 +272,7 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                 }
             }
         }
-        item {
+        if (!financeOnly && !walletOnly) item {
             GlassCard {
                 Text("POMODORO FOCUS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Text("Start a 25 minute focus block. Controls stay in your notification shade.", color = TextPrimary)

@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.afraz.campusos.core.util.OemBatteryHelper
@@ -48,6 +49,8 @@ class DashboardViewModel @Inject constructor(
 ) : ViewModel() {
     private val pinnedKey = stringSetPreferencesKey("dashboard_pinned_tools")
     private val dismissedKey = booleanPreferencesKey("battery_warning_dismissed")
+    private val timetablePathKey = stringPreferencesKey("timetable_asset_path")
+    private val timetableMimeKey = stringPreferencesKey("timetable_asset_mime")
     private val preferences = settings.data
 
     val state: StateFlow<DashboardState> = combine(
@@ -74,8 +77,8 @@ class DashboardViewModel @Inject constructor(
             pinnedTools = orderedPinnedTools(prefs[pinnedKey] ?: DEFAULT_PINNED.toSet()),
             showBatteryWarning = OemBatteryHelper.shouldShow(context),
             batteryWarningDismissed = prefs[dismissedKey] ?: false,
-            timetableAssetPath = context.getSharedPreferences("campusos_timetable", Context.MODE_PRIVATE).getString("path", null),
-            timetableAssetMime = context.getSharedPreferences("campusos_timetable", Context.MODE_PRIVATE).getString("mime", null)
+            timetableAssetPath = prefs[timetablePathKey],
+            timetableAssetMime = prefs[timetableMimeKey]
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
 
@@ -91,7 +94,7 @@ class DashboardViewModel @Inject constructor(
 
     companion object {
         const val PIN_LIMIT = 3
-        val TOOL_CATALOG = listOf("Scan Notes", "Expense Tracker", "Pomodoro", "Assignments", "Timetable", "Digital Wallet", "PDF Maker")
+        val TOOL_CATALOG = listOf("Scan Notes", "Expense Tracker", "Pomodoro", "Assignments", "Timetable", "Digital ID", "Finance", "PDF Maker")
         val DEFAULT_PINNED = listOf("Scan Notes", "Expense Tracker", "Pomodoro")
         private fun orderedPinnedTools(pinned: Set<String>) = TOOL_CATALOG.filter { it in pinned }.take(PIN_LIMIT)
     }
