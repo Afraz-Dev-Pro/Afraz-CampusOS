@@ -25,8 +25,7 @@ service cloud.firestore {
           && data.expiresAt <= request.time.toMillis() + 1209600000;
       }
 
-      allow read: if resource.data.expiresAt is int
-        && resource.data.expiresAt > request.time.toMillis();
+      allow read: if true;
       allow create: if validPost(request.resource.data);
       allow update: if request.auth != null
         && request.auth.uid == resource.data.uid
