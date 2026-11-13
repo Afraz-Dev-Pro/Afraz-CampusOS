@@ -8,20 +8,22 @@ import java.io.File
  * Canonical paths also reject symlinks that point outside the app's managed document folders.
  */
 object LocalDocumentPaths {
-    fun resolveManagedFile(context: Context, path: String): File? = runCatching {
+    fun resolveManagedFile(context: Context, path: String): File? {
         if (path.isBlank()) return null
 
-        val filesRoot = context.filesDir.canonicalFile
-        val candidate = File(path).canonicalFile
-        val separator = File.separator
-        val rootPrefix = filesRoot.path.trimEnd(separator[0]) + separator
+        return runCatching {
+            val filesRoot = context.filesDir.canonicalFile
+            val candidate = File(path).canonicalFile
+            val separator = File.separator
+            val rootPrefix = filesRoot.path.trimEnd(separator[0]) + separator
 
-        listOf("pdfs", "wallet")
-            .map { File(filesRoot, it).canonicalFile }
-            .firstOrNull { directory ->
-                directory.path.startsWith(rootPrefix) &&
-                    candidate.path.startsWith(directory.path.trimEnd(separator[0]) + separator)
-            }
-            ?.let { candidate }
-    }.getOrNull()
+            listOf("pdfs", "wallet")
+                .map { File(filesRoot, it).canonicalFile }
+                .firstOrNull { directory ->
+                    directory.path.startsWith(rootPrefix) &&
+                        candidate.path.startsWith(directory.path.trimEnd(separator[0]) + separator)
+                }
+                ?.let { candidate }
+        }.getOrNull()
+    }
 }
