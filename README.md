@@ -51,12 +51,42 @@ Download the APK from the official [V1.4A release page](https://github.com/Afraz
 
 ## 📱 App Showcase
 
-<p align="center">
-  <img src="assets/screenshots/campusos-showcase.svg" width="100%" alt="CampusOS visual preview of Dashboard, Academics, Toolkit, Finance and HackHub" />
-</p>
+<p align="center"><strong>One app, five campus spaces.</strong><br /><sub>Real screens captured from the CampusOS Android app.</sub></p>
 
-<p align="center"><sub>A visual tour of the five CampusOS spaces and the everyday tools inside them.</sub></p>
+<table align="center">
+  <tr>
+    <th width="33%" align="center">🏠 Dashboard</th>
+    <th width="33%" align="center">📚 Academics</th>
+    <th width="33%" align="center">📈 Study Progress</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="assets/screenshots/dashboard.png" alt="CampusOS Dashboard" width="220" /></td>
+    <td align="center"><img src="assets/screenshots/academics.png" alt="CampusOS Academics and timetable" width="220" /></td>
+    <td align="center"><img src="assets/screenshots/academics-progress.png" alt="CampusOS academic progress and tasks" width="220" /></td>
+  </tr>
+  <tr>
+    <th align="center">🧰 Toolkit</th>
+    <th align="center">🪪 Digital ID & Focus</th>
+    <th align="center">💸 Finance</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="assets/screenshots/toolkit.png" alt="CampusOS Toolkit" width="220" /></td>
+    <td align="center"><img src="assets/screenshots/toolkit-wallet-focus.png" alt="CampusOS Digital ID wallet and focus timer" width="220" /></td>
+    <td align="center"><img src="assets/screenshots/finance.png" alt="CampusOS Finance and personal spend" width="220" /></td>
+  </tr>
+  <tr>
+    <th align="center">🧾 Bill Splits</th>
+    <th align="center">🚀 HackHub</th>
+    <th align="center">🤝 Teammates</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="assets/screenshots/finance-splits.png" alt="CampusOS equal and custom bill splitting" width="220" /></td>
+    <td align="center"><img src="assets/screenshots/hackhub.png" alt="CampusOS HackHub" width="220" /></td>
+    <td align="center"><img src="assets/screenshots/hackhub-teammates.png" alt="CampusOS teammate finder" width="220" /></td>
+  </tr>
+</table>
 
+<p align="center"><img src="assets/screenshots/about.png" alt="CampusOS About page" width="220" /><br /><sub>About CampusOS · Developed by Afraz Ahamed</sub></p>
 ---
 
 ## ✨ What you can do
