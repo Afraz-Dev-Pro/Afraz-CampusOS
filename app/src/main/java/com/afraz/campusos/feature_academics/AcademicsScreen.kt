@@ -96,6 +96,10 @@ fun AcademicsScreen(modifier: Modifier = Modifier, viewModel: AcademicsViewModel
     var shareCode by remember { mutableStateOf("") }
     var qrBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var timetableMessage by remember { mutableStateOf("") }
+    var pyqSearch by remember { mutableStateOf("") }
+    val timetableAssetPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) { viewModel.saveTimetableAsset(uri); timetableMessage = "Timetable file saved for Dashboard" }
+    }
     val qrImagePicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             val decoded = runCatching {
@@ -119,6 +123,8 @@ fun AcademicsScreen(modifier: Modifier = Modifier, viewModel: AcademicsViewModel
         item {
             GlassCard {
                 Text("WEEKLY TIMETABLE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Choose a day, add courses, then add one or more time slots. Save Course stores the subject details so they can be scheduled and tracked for attendance.", color = TextSecondary, fontSize = 12.sp)
+                OutlinedButton(onClick = { timetableAssetPicker.launch(arrayOf("image/*", "application/pdf")) }) { Text("Add timetable image or PDF") }
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     dayNames.forEachIndexed { index, day ->
@@ -172,9 +178,10 @@ fun AcademicsScreen(modifier: Modifier = Modifier, viewModel: AcademicsViewModel
                 Button(onClick = {
                     if (courseName.isNotBlank() && courseCode.isNotBlank()) {
                         viewModel.addCourse(courseName, courseCode, professor, room, credits.toIntOrNull() ?: 0)
+                        timetableMessage = "Course saved. Add a time slot below to place it on your timetable."
                         courseName = ""; courseCode = ""; professor = ""; room = ""
                     }
-                }) { Text("Save course") }
+                }, enabled = courseName.isNotBlank() && courseCode.isNotBlank()) { Text("Save course") }
             }
         }
         if (state.courses.isNotEmpty()) item {
@@ -188,13 +195,34 @@ fun AcademicsScreen(modifier: Modifier = Modifier, viewModel: AcademicsViewModel
                 Button(onClick = {
                     val start = slotStart.toMinutesOrNull()
                     val end = slotEnd.toMinutesOrNull()
-                    if (slotCourse.isNotBlank() && start != null && end != null) viewModel.addSlot(slotCourse, state.selectedDay, start, end)
-                }) { Text("Add to ${dayNames[state.selectedDay - 1]}") }
+                    if (slotCourse.isNotBlank() && start != null && end != null && end > start) {
+                        viewModel.addSlot(slotCourse, state.selectedDay, start, end)
+                        timetableMessage = "Added to ${dayNames[state.selectedDay - 1]}"
+                    } else timetableMessage = "Choose a course and enter a valid end time after the start time."
+                }, enabled = slotCourse.isNotBlank()) { Text("Add to ${dayNames[state.selectedDay - 1]}") }
+                Text("Selected day: ${dayNames[state.selectedDay - 1]}", color = TextSecondary)
             }
         }
         item { Text("BUNK METER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
         items(state.courses, key = { "course-${it.id}" }) { course ->
             AttendanceCard(course, onPresent = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); viewModel.markAttendance(course.id, true) }, onAbsent = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); viewModel.markAttendance(course.id, false) }, onUndo = { viewModel.undoAttendance(course.id) }, onTargetChange = { viewModel.setTarget(course.id, it) })
+        }
+        item {
+            GlassCard {
+                Text("PYQ VAULT", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                OutlinedTextField(pyqSearch, { pyqSearch = it }, label = { Text("Search subject, code or semester") }, modifier = Modifier.fillMaxWidth())
+                val papers = state.pyqs.filter { paper -> pyqSearch.isBlank() || paper.subjectName.contains(pyqSearch, true) || paper.courseCode.contains(pyqSearch, true) || paper.semester.toString() == pyqSearch }
+                if (papers.isEmpty()) Text("No papers match this search yet.", color = TextSecondary)
+                papers.forEach { paper ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(paper.subjectName, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                            Text("${paper.courseCode} · semester ${paper.semester} · ${paper.year}", color = TextSecondary, fontSize = 12.sp)
+                        }
+                        Button(onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(paper.pdfUrl))) } }) { Text("Open PDF") }
+                    }
+                }
+            }
         }
         item {
             GlassCard {

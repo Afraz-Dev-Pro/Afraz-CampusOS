@@ -3,6 +3,8 @@ package com.afraz.campusos.feature_academics
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.content.Context
+import android.net.Uri
+import java.io.File
 import androidx.room.withTransaction
 import com.afraz.campusos.data.AppDatabase
 import com.afraz.campusos.data.AttendanceLogEntity
@@ -13,6 +15,8 @@ import com.afraz.campusos.data.SyllabusTopicEntity
 import com.afraz.campusos.data.TaskEntity
 import com.afraz.campusos.core.util.TimetableCodec
 import com.afraz.campusos.feature_academics.alarm.CampusAlarmScheduler
+import com.afraz.campusos.feature_hackhub.CommunityFeedRepository
+import com.afraz.campusos.feature_hackhub.PyqItem
 import com.afraz.campusos.feature_toolkit.widget.CampusGlanceWidget
 import androidx.glance.appwidget.updateAll
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +39,8 @@ data class AcademicsState(
     val slots: List<ScheduleSlotEntity> = emptyList(),
     val tasks: List<TaskEntity> = emptyList(),
     val topics: List<SyllabusTopicEntity> = emptyList(),
-    val grades: List<SemesterGradeEntity> = emptyList()
+    val grades: List<SemesterGradeEntity> = emptyList(),
+    val pyqs: List<PyqItem> = emptyList()
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -43,9 +48,11 @@ data class AcademicsState(
 class AcademicsViewModel @Inject constructor(
     private val database: AppDatabase,
     private val alarmScheduler: CampusAlarmScheduler,
+    private val feedRepository: CommunityFeedRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
     private val selectedDay = MutableStateFlow(1)
+    private val pyqs = MutableStateFlow<List<PyqItem>>(emptyList())
     val state: StateFlow<AcademicsState> = selectedDay.flatMapLatest { day ->
         combine(
             database.courseDao().observeAll(),
@@ -53,17 +60,32 @@ class AcademicsViewModel @Inject constructor(
             database.taskDao().observeAll(),
             database.syllabusTopicDao().observeAll(),
             database.semesterGradeDao().observeAll()
-        ) { courses, slots, tasks, topics, grades -> AcademicsState(day, courses, slots, tasks, topics, grades) }
+        ) { courses, slots, tasks, topics, grades -> AcademicsState(day, courses, slots, tasks, topics, grades, pyqs.value) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AcademicsState())
 
-    init { viewModelScope.launch(Dispatchers.IO) { alarmScheduler.rescheduleAll() } }
+    init {
+        viewModelScope.launch(Dispatchers.IO) { alarmScheduler.rescheduleAll() }
+        viewModelScope.launch(Dispatchers.IO) { pyqs.value = runCatching { feedRepository.load().pyqs }.getOrDefault(emptyList()) }
+    }
 
     fun selectDay(day: Int) { if (day in 1..7) selectedDay.value = day }
 
     fun addCourse(name: String, code: String, professor: String, room: String, credits: Int) = viewModelScope.launch(Dispatchers.IO) {
+        if (name.isBlank() || code.isBlank()) return@launch
         val id = UUID.randomUUID().toString()
         database.courseDao().upsert(CourseEntity(id, name.trim(), code.trim(), professor.trim(), room.trim(), credits = credits.coerceAtLeast(0)))
         refreshWidget()
+    }
+
+    fun saveTimetableAsset(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
+        val mime = context.contentResolver.getType(uri) ?: return@launch
+        if (mime !in setOf("application/pdf", "image/jpeg", "image/png", "image/webp")) return@launch
+        val directory = File(context.filesDir, "timetable").apply { mkdirs() }
+        val extension = when (mime) { "application/pdf" -> "pdf"; "image/png" -> "png"; "image/webp" -> "webp"; else -> "jpg" }
+        val destination = File(directory, "timetable.$extension")
+        context.contentResolver.openInputStream(uri)?.use { input -> destination.outputStream().use(input::copyTo) } ?: return@launch
+        context.getSharedPreferences("campusos_timetable", Context.MODE_PRIVATE).edit()
+            .putString("path", destination.absolutePath).putString("mime", mime).apply()
     }
 
     fun addSlot(courseId: String, day: Int, startMinutes: Int, endMinutes: Int) = viewModelScope.launch(Dispatchers.IO) {
