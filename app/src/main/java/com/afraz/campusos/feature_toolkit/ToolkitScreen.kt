@@ -59,6 +59,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.afraz.campusos.core.designsystem.GlassCard
 import com.afraz.campusos.core.designsystem.TextPrimary
 import com.afraz.campusos.core.designsystem.TextSecondary
+import com.afraz.campusos.core.util.ExpenseMath
 import com.afraz.campusos.core.util.UpiDeepLinkHelper
 import com.afraz.campusos.data.WalletDocEntity
 import com.afraz.campusos.feature_toolkit.focus.PomodoroForegroundService
@@ -95,6 +96,9 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
     var groupTitle by remember { mutableStateOf("") }
     var groupAmount by remember { mutableStateOf("") }
     var customShares by remember { mutableStateOf("") }
+    var peopleSplitAmount by remember { mutableStateOf("") }
+    var peopleCount by remember { mutableStateOf("2") }
+    var calculatedPeopleShares by remember { mutableStateOf<List<Long>?>(null) }
     var selectedFriends by remember { mutableStateOf(setOf<String>()) }
     var capturedPhotos by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
@@ -213,12 +217,38 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
         }
         if (financeOnly) item {
             GlassCard {
+                Text("SPLIT BY PEOPLE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Divide any bill evenly without saving contacts or UPI IDs.", color = TextSecondary, fontSize = 12.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(peopleSplitAmount, { peopleSplitAmount = it; calculatedPeopleShares = null }, label = { Text("Total ₹") }, modifier = Modifier.weight(1f))
+                    OutlinedTextField(peopleCount, { peopleCount = it.filter(Char::isDigit).take(3); calculatedPeopleShares = null }, label = { Text("People") }, modifier = Modifier.weight(1f))
+                }
+                val splitTotalPaise = runCatching { ExpenseMath.rupeesToPaise(peopleSplitAmount) }.getOrNull()
+                val count = peopleCount.toIntOrNull()
+                Button(
+                    onClick = { calculatedPeopleShares = runCatching { ExpenseMath.splitPaise(splitTotalPaise!!, count!!) }.getOrNull() },
+                    enabled = splitTotalPaise != null && splitTotalPaise > 0L && count != null && count in 1..100
+                ) { Text("Calculate share") }
+                calculatedPeopleShares?.let { shares ->
+                    val distribution = shares.groupingBy { it }.eachCount().entries
+                        .sortedBy { it.key }
+                        .joinToString(" · ") { (paise, people) -> "₹${"%.2f".format(paise / 100.0)} × $people" }
+                    Text(if (shares.distinct().size == 1) "₹${"%.2f".format(shares.first() / 100.0)} each · ${shares.size} people" else "Per-person shares: $distribution", color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                    if (shares.distinct().size > 1) Text("Extra paise are distributed so the shares add up to the exact total.", color = TextSecondary, fontSize = 12.sp)
+                }
+            }
+        }
+        if (financeOnly) item {
+            GlassCard {
                 Text("FRIENDS & BILL SPLITTER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(friendName, { friendName = it }, label = { Text("Name") }, modifier = Modifier.weight(1f))
                     OutlinedTextField(friendUpi, { friendUpi = it }, label = { Text("UPI ID") }, modifier = Modifier.weight(1f))
                 }
                 Button(onClick = { viewModel.saveFriend(friendName, friendUpi); friendName = ""; friendUpi = "" }, enabled = friendName.isNotBlank() && friendUpi.contains('@')) { Text("Save friend") }
+                if (friendName.isNotBlank() && !friendUpi.contains('@')) {
+                    Text("Add a UPI ID (for example, name@bank) to enable Save friend.", color = TextSecondary, fontSize = 12.sp)
+                }
                 state.friends.forEach { friend ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(friend.id in selectedFriends, onCheckedChange = { checked -> selectedFriends = if (checked) selectedFriends + friend.id else selectedFriends - friend.id })
@@ -229,7 +259,14 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                     OutlinedTextField(groupTitle, { groupTitle = it }, label = { Text("Bill note") }, modifier = Modifier.weight(1f))
                     OutlinedTextField(groupAmount, { groupAmount = it }, label = { Text("Total ₹") }, modifier = Modifier.weight(1f))
                 }
-                Button(onClick = { viewModel.createEqualSplit(groupTitle, groupAmount, selectedFriends.toList()); groupTitle = ""; groupAmount = "" }, enabled = groupTitle.isNotBlank() && groupAmount.isNotBlank() && selectedFriends.isNotEmpty()) { Text("Split equally") }
+                val validSplitTotal = groupAmount.trim().toBigDecimalOrNull()?.let { it > java.math.BigDecimal.ZERO } == true
+                when {
+                    state.friends.isEmpty() -> Text("To split a bill, first save a friend with a valid UPI ID above.", color = TextSecondary, fontSize = 12.sp)
+                    selectedFriends.isEmpty() -> Text("Select at least one saved friend. The total will be divided evenly between you and the selected friends.", color = TextSecondary, fontSize = 12.sp)
+                    !validSplitTotal && groupAmount.isNotBlank() -> Text("Enter a total greater than ₹0.", color = TextSecondary, fontSize = 12.sp)
+                    selectedFriends.isNotEmpty() -> Text("Splitting the total across you and ${selectedFriends.size} selected friend(s).", color = TextSecondary, fontSize = 12.sp)
+                }
+                Button(onClick = { viewModel.createEqualSplit(groupTitle, groupAmount, selectedFriends.toList()); groupTitle = ""; groupAmount = "" }, enabled = groupTitle.isNotBlank() && validSplitTotal && selectedFriends.isNotEmpty()) { Text("Split equally") }
                 Text("Custom split: enter one ₹ share per selected friend, in the list order. Any remainder stays with you.", color = TextSecondary, fontSize = 12.sp)
                 OutlinedTextField(customShares, { customShares = it }, label = { Text("Custom friend shares, comma separated") }, modifier = Modifier.fillMaxWidth())
                 Button(onClick = {
