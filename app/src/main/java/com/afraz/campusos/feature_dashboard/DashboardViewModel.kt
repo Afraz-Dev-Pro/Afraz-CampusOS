@@ -91,7 +91,7 @@ class DashboardViewModel @Inject constructor(
 
     companion object {
         const val PIN_LIMIT = 3
-        val TOOL_CATALOG = listOf("Scan Notes", "Expense Tracker", "Pomodoro", "Assignments", "Timetable", "Digital Wallet", "PDF Maker")
+        val TOOL_CATALOG = listOf("Scan Notes", "Expense Tracker", "Pomodoro", "Assignments", "Timetable", "Digital ID", "Finance", "PDF Maker")
         val DEFAULT_PINNED = listOf("Scan Notes", "Expense Tracker", "Pomodoro")
         private fun orderedPinnedTools(pinned: Set<String>) = TOOL_CATALOG.filter { it in pinned }.take(PIN_LIMIT)
     }
