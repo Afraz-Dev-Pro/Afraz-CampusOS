@@ -2,7 +2,7 @@
 
 CampusOS is an Android student super-app with application ID `com.afraz.campusos`. It uses Kotlin, Jetpack Compose, Room, Hilt, DataStore, Google Play services Document Scanner, native PDF generation, Retrofit/OkHttp, and Firebase's client SDK.
 
-The current release target is **v1.1.2** (`versionCode` 4).
+The current release target is **v1.1.3** (`versionCode` 5).
 
 ## Build
 

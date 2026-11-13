@@ -19,6 +19,8 @@ import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,9 +31,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -78,6 +84,7 @@ import java.text.DateFormat
 import java.util.Calendar
 import kotlin.math.max
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = false, onAutoStartConsumed: () -> Unit = {}, financeOnly: Boolean = false, walletOnly: Boolean = false, viewModel: ToolkitViewModel = hiltViewModel()) {
     val context = LocalContext.current
@@ -208,9 +215,12 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                     Button(onClick = { viewModel.setMonthlyBudget(budget); budget = "" }) { Text("Set") }
                 }
                 state.expenses.take(5).forEach { expense ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("${expense.title} · ${expense.category}", color = TextPrimary)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("${expense.title} · ${expense.category}", color = TextPrimary, modifier = Modifier.weight(1f), maxLines = 1)
                         Text("₹${"%.2f".format(expense.amountPaise / 100.0)}", color = TextSecondary)
+                        IconButton(onClick = { viewModel.deleteExpense(expense.id) }, modifier = Modifier.height(36.dp)) {
+                            Icon(Icons.Default.Close, contentDescription = "Remove ${expense.title}", tint = TextSecondary)
+                        }
                     }
                 }
             }
@@ -277,7 +287,7 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                 state.groups.forEach { group ->
                     Text("${group.title} · ₹${"%.2f".format(group.totalAmountPaise / 100.0)}", color = TextPrimary, fontWeight = FontWeight.SemiBold)
                     state.splits.filter { it.groupId == group.id }.forEach { split ->
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
                                 Text("${split.friendName} · ₹${"%.2f".format(split.shareAmountPaise / 100.0)}", color = TextPrimary)
                                 Text(if (split.isSettled) "Settled" else "Unsettled", color = TextSecondary, fontSize = 12.sp)
@@ -296,7 +306,7 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                 Text("DIGITAL ID & DOCUMENT WALLET", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Button(onClick = { documentPicker.launch(arrayOf("image/*", "application/pdf")) }) { Text("Add ID, pass or hall ticket") }
                 state.documents.forEach { doc ->
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text(doc.title, color = TextPrimary, fontWeight = FontWeight.SemiBold)
                             Text("${doc.docType} · ${doc.subjectFolder ?: "Campus"}", color = TextSecondary, fontSize = 12.sp)
@@ -313,7 +323,7 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
             GlassCard {
                 Text("POMODORO FOCUS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Text("Start a 25 minute focus block. Controls stay in your notification shade.", color = TextPrimary)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); startFocus() }) { Text("Start") }
                     Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); PomodoroForegroundService.sendAction(context, ACTION_PAUSE) }) { Text("Pause / resume") }
                     Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); PomodoroForegroundService.sendAction(context, ACTION_SKIP) }) { Text("Skip") }
