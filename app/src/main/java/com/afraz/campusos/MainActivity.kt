@@ -9,10 +9,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +39,7 @@ import com.afraz.campusos.core.designsystem.GlassBorderTop
 import com.afraz.campusos.core.designsystem.GlassFill
 import com.afraz.campusos.feature_academics.AcademicsScreen
 import com.afraz.campusos.feature_dashboard.DashboardScreen
+import com.afraz.campusos.feature_dashboard.AboutScreen
 import com.afraz.campusos.feature_hackhub.HackHubScreen
 import com.afraz.campusos.feature_toolkit.ToolkitScreen
 import com.afraz.campusos.feature_toolkit.FinanceScreen
@@ -66,6 +74,7 @@ private fun CampusShell(openScannerRequest: Boolean, onScannerConsumed: () -> Un
     val backStack by navController.currentBackStackEntryAsState()
     val destination = backStack?.destination
     val currentRoute = destination?.route.orEmpty()
+    val isAboutPage = currentRoute.substringAfterLast('.').startsWith("About")
     LaunchedEffect(openScannerRequest) {
         if (openScannerRequest) navController.navigate(CampusRoute.Toolkit) { launchSingleTop = true }
     }
@@ -78,7 +87,23 @@ private fun CampusShell(openScannerRequest: Boolean, onScannerConsumed: () -> Un
     )
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (isAboutPage) IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+                }
+                Text(if (isAboutPage) "About CampusOS" else "CampusOS", fontSize = 16.sp)
+                Spacer(Modifier.weight(1f))
+                if (!isAboutPage) IconButton(onClick = { navController.navigate(CampusRoute.About) { launchSingleTop = true } }) {
+                    Icon(Icons.Outlined.Info, contentDescription = "About CampusOS")
+                }
+            }
+        },
         bottomBar = {
+            if (!isAboutPage) {
             androidx.compose.material3.Surface(
                 color = GlassFill,
                 shape = RoundedCornerShape(26.dp),
@@ -103,6 +128,7 @@ private fun CampusShell(openScannerRequest: Boolean, onScannerConsumed: () -> Un
                     }
                 }
             }
+            }
         }
     ) { insets ->
         NavHost(navController = navController, startDestination = CampusRoute.Dashboard, modifier = Modifier.padding(insets)) {
@@ -122,6 +148,7 @@ private fun CampusShell(openScannerRequest: Boolean, onScannerConsumed: () -> Un
             composable<CampusRoute.HackHub> { HackHubScreen() }
             composable<CampusRoute.Finance> { FinanceScreen() }
             composable<CampusRoute.DigitalId> { ToolkitScreen(walletOnly = true) }
+            composable<CampusRoute.About> { AboutScreen() }
         }
     }
 }
