@@ -1,0 +1,18 @@
+[
+  {
+    "id": "cs101-2025",
+    "subjectName": "Programming Fundamentals",
+    "courseCode": "CS101",
+    "semester": 1,
+    "year": 2025,
+    "pdfUrl": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+  },
+  {
+    "id": "ma102-2024",
+    "subjectName": "Engineering Mathematics II",
+    "courseCode": "MA102",
+    "semester": 2,
+    "year": 2024,
+    "pdfUrl": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+  }
+]

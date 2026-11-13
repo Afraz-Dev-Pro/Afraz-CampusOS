@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /teammate_posts/{postId} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'authorName', 'college', 'pitchBio', 'skills', 'githubUsername', 'contactUrl', 'expiresAt'])
+        && request.auth.uid == request.resource.data.uid
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() <= 40
+        && request.resource.data.college is string
+        && request.resource.data.college.size() <= 60
+        && request.resource.data.pitchBio is string
+        && request.resource.data.pitchBio.size() <= 150
+        && request.resource.data.skills is list
+        && request.resource.data.skills.size() <= 8
+        && request.resource.data.githubUsername is string
+        && request.resource.data.githubUsername.size() <= 39
+        && request.resource.data.contactUrl is string
+        && request.resource.data.contactUrl.size() <= 200
+        && request.resource.data.expiresAt is int
+        && request.resource.data.expiresAt > request.time.toMillis();
+      allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
+    }
+  }
+}
