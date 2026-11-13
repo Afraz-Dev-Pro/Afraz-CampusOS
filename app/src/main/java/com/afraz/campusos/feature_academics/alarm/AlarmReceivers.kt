@@ -18,6 +18,12 @@ import kotlinx.coroutines.launch
 
 class AlarmRescheduleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
+        if (intent?.action !in setOf(
+                Intent.ACTION_BOOT_COMPLETED,
+                "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED"
+            )
+        ) return
+
         val pending = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
