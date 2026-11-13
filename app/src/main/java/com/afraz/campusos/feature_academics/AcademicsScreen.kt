@@ -10,6 +10,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,6 +71,7 @@ import kotlinx.coroutines.withContext
 
 private val dayNames = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AcademicsScreen(modifier: Modifier = Modifier, viewModel: AcademicsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
@@ -126,9 +129,20 @@ fun AcademicsScreen(modifier: Modifier = Modifier, viewModel: AcademicsViewModel
                 Text("Choose a day, add courses, then add one or more time slots. Save Course stores the subject details so they can be scheduled and tracked for attendance.", color = TextSecondary, fontSize = 12.sp)
                 OutlinedButton(onClick = { timetableAssetPicker.launch(arrayOf("image/*", "application/pdf")) }) { Text("Add timetable image or PDF") }
                 Spacer(Modifier.height(10.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    dayNames.forEachIndexed { index, day ->
-                        Button(onClick = { viewModel.selectDay(index + 1) }, shape = RoundedCornerShape(10.dp)) { Text(day) }
+                dayNames.chunked(4).forEachIndexed { rowIndex, days ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        days.forEachIndexed { dayIndex, day ->
+                            val dayNumber = rowIndex * 4 + dayIndex + 1
+                            Button(
+                                onClick = { viewModel.selectDay(dayNumber) },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = if (state.selectedDay == dayNumber) com.afraz.campusos.core.designsystem.AccentIndigo else com.afraz.campusos.core.designsystem.SurfaceElevated
+                                )
+                            ) { Text(day, maxLines = 1) }
+                        }
+                        if (days.size < 4) Spacer(Modifier.weight((4 - days.size).toFloat()))
                     }
                 }
                 Spacer(Modifier.height(8.dp))
@@ -187,8 +201,10 @@ fun AcademicsScreen(modifier: Modifier = Modifier, viewModel: AcademicsViewModel
         if (state.courses.isNotEmpty()) item {
             GlassCard {
                 Text("ADD TIMETABLE SLOT", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                state.courses.forEach { course ->
-                    Button(onClick = { slotCourse = course.id }, enabled = slotCourse != course.id, modifier = Modifier.padding(end = 6.dp)) { Text(course.code) }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    state.courses.forEach { course ->
+                        Button(onClick = { slotCourse = course.id }, enabled = slotCourse != course.id) { Text(course.code) }
+                    }
                 }
                 OutlinedTextField(slotStart, { slotStart = it }, label = { Text("Start time (HH:mm)") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(slotEnd, { slotEnd = it }, label = { Text("End time (HH:mm)") }, modifier = Modifier.fillMaxWidth())

@@ -10,6 +10,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,7 +52,7 @@ import java.time.temporal.ChronoUnit
 
 private val skillTags = listOf("Kotlin", "Compose", "Python", "C++", "Web", "AI/ML", "CyberSec", "UI/UX")
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = hiltViewModel()) {
     val context = LocalContext.current
@@ -101,7 +103,7 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
                     Button(onClick = viewModel::refreshTeammates) { Text("Refresh") }
                 }
                 Text("Posts expire after 14 days. Open profiles or contact links to connect.", color = TextSecondary, fontSize = 12.sp)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Button(onClick = { viewModel.selectSkill(null) }) { Text("All") }
                     skillTags.forEach { tag ->
                         if (tag in skillTags.take(3)) Button(onClick = { viewModel.selectSkill(if (state.selectedSkill == tag) null else tag) }) { Text(if (state.selectedSkill == tag) "✓ $tag" else tag) }
