@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS"><img src="https://img.shields.io/badge/Release-v1.1.3-6366F1?style=for-the-badge&logo=android&logoColor=white" alt="CampusOS v1.1.3" /></a>
+  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A"><img src="https://img.shields.io/badge/Release-V1.4A-6366F1?style=for-the-badge&logo=android&logoColor=white" alt="CampusOS V1.4A release" /></a>
   <a href="https://developer.android.com/"><img src="https://img.shields.io/badge/Android-8.0%2B%20(API%2026)-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android 8.0 and newer" /></a>
   <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin 2.0.21" /></a>
   <a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose and Material 3" /></a>
@@ -28,7 +28,8 @@
 
 CampusOS brings the tools students reach for every day into one thoughtfully designed, offline-first Android experience. See what is next, keep your timetable close, track your progress, and get back to the work that matters.
 
-> **Current build:** v1.1.3 · `com.afraz.campusos` · version code `5`
+> **Current build:** v1.1.3 · `com.afraz.campusos` · version code `5`  
+> **Published release:** [CampusOS V1.4A](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A) · [Download APK](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/download/V1.4A/Afraz.CampusOS.V1.4A.apk)
 
 ---
 
