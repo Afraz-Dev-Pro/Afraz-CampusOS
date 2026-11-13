@@ -10,4 +10,5 @@ sealed interface CampusRoute {
     @Serializable data object HackHub : CampusRoute
     @Serializable data object Finance : CampusRoute
     @Serializable data object DigitalId : CampusRoute
+    @Serializable data object About : CampusRoute
 }
