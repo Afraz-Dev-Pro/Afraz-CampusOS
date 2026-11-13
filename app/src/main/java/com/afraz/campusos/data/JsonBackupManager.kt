@@ -8,6 +8,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
+import java.io.ByteArrayOutputStream
+import java.io.FilterInputStream
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.zip.GZIPInputStream
@@ -15,6 +18,7 @@ import java.util.zip.GZIPOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.afraz.campusos.feature_toolkit.widget.CampusGlanceWidget
+import com.afraz.campusos.core.util.LocalDocumentPaths
 
 @Serializable
 data class CampusBackupV1(
@@ -69,14 +73,19 @@ class JsonBackupManager @Inject constructor(
     }
 
     suspend fun restore(input: InputStream) {
-        val buffered = BufferedInputStream(input)
+        val buffered = BufferedInputStream(SizeLimitedInputStream(input, MAX_BACKUP_BYTES))
         buffered.mark(2)
         val first = buffered.read()
         val second = buffered.read()
         buffered.reset()
-        val source = if (first == 0x1f && second == 0x8b) GZIPInputStream(buffered) else buffered
-        val payload = source.bufferedReader(Charsets.UTF_8).use { json.decodeFromString(CampusBackupV1.serializer(), it.readText()) }
+        val decompressed = if (first == 0x1f && second == 0x8b) GZIPInputStream(buffered) else buffered
+        val source = SizeLimitedInputStream(decompressed, MAX_BACKUP_BYTES)
+        val backupJson = source.bufferedReader(Charsets.UTF_8).use { it.readText() }
+        val payload = json.decodeFromString(CampusBackupV1.serializer(), backupJson)
         require(payload.version == 1) { "Unsupported CampusOS backup version: ${payload.version}" }
+        require(payload.walletDocuments.all { LocalDocumentPaths.resolveManagedFile(context, it.localFilePath) != null }) {
+            "Backup contains a document path outside CampusOS storage"
+        }
         database.withTransaction {
             database.expenseSplitDao().clear()
             database.attendanceLogDao().clear()
@@ -108,5 +117,38 @@ class JsonBackupManager @Inject constructor(
     suspend fun restoreFromUri(uri: Uri) {
         val input = context.contentResolver.openInputStream(uri) ?: error("Unable to open backup file")
         restore(input)
+    }
+}
+
+
+private const val MAX_BACKUP_BYTES = 16L * 1024L * 1024L
+
+/**
+ * Caps both the stored backup bytes and decompressed JSON bytes so oversized files fail
+ * before they can consume unbounded memory or enter the database transaction.
+ */
+private class SizeLimitedInputStream(input: InputStream, private val maxBytes: Long) : FilterInputStream(input) {
+    private var bytesRead = 0L
+
+    override fun read(): Int {
+        if (bytesRead >= maxBytes) {
+            if (super.read() == -1) return -1
+            throw IOException("Backup exceeds the 16 MiB size limit")
+        }
+        val value = super.read()
+        if (value != -1) bytesRead++
+        return value
+    }
+
+    override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
+        if (length == 0) return 0
+        if (bytesRead >= maxBytes) {
+            read()
+            return -1
+        }
+        val allowedLength = minOf(length.toLong(), maxBytes - bytesRead).toInt()
+        val count = super.read(buffer, offset, allowedLength)
+        if (count > 0) bytesRead += count
+        return count
     }
 }

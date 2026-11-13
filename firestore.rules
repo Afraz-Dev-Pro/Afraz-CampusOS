@@ -2,24 +2,35 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /teammate_posts/{postId} {
+      function validPost(data) {
+        return request.auth != null
+          && data.keys().hasAll(['uid', 'authorName', 'college', 'pitchBio', 'skills', 'githubUsername', 'contactUrl', 'expiresAt'])
+          && data.keys().hasOnly(['uid', 'authorName', 'college', 'pitchBio', 'skills', 'githubUsername', 'contactUrl', 'expiresAt'])
+          && data.uid == request.auth.uid
+          && data.authorName is string
+          && data.authorName.size() <= 40
+          && data.college is string
+          && data.college.size() <= 60
+          && data.pitchBio is string
+          && data.pitchBio.size() <= 150
+          && data.skills is list
+          && data.skills.size() <= 8
+          && data.skills.toSet().hasOnly(['Kotlin', 'Compose', 'Python', 'C++', 'Web', 'AI/ML', 'CyberSec', 'UI/UX'])
+          && data.githubUsername is string
+          && data.githubUsername.size() <= 39
+          && data.contactUrl is string
+          && data.contactUrl.size() <= 200
+          && data.expiresAt is int
+          && data.expiresAt > request.time.toMillis()
+          && data.expiresAt <= request.time.toMillis() + 1209600000;
+      }
+
       allow read: if true;
-      allow create, update: if request.auth != null
-        && request.resource.data.keys().hasOnly(['uid', 'authorName', 'college', 'pitchBio', 'skills', 'githubUsername', 'contactUrl', 'expiresAt'])
-        && request.auth.uid == request.resource.data.uid
-        && request.resource.data.authorName is string
-        && request.resource.data.authorName.size() <= 40
-        && request.resource.data.college is string
-        && request.resource.data.college.size() <= 60
-        && request.resource.data.pitchBio is string
-        && request.resource.data.pitchBio.size() <= 150
-        && request.resource.data.skills is list
-        && request.resource.data.skills.size() <= 8
-        && request.resource.data.githubUsername is string
-        && request.resource.data.githubUsername.size() <= 39
-        && request.resource.data.contactUrl is string
-        && request.resource.data.contactUrl.size() <= 200
-        && request.resource.data.expiresAt is int
-        && request.resource.data.expiresAt > request.time.toMillis();
+      allow create: if validPost(request.resource.data);
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.uid
+        && request.resource.data.uid == resource.data.uid
+        && validPost(request.resource.data);
       allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
   }

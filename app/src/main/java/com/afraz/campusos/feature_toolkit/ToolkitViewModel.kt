@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.afraz.campusos.core.util.ExpenseMath
 import com.afraz.campusos.core.util.PdfGenerator
+import com.afraz.campusos.core.util.LocalDocumentPaths
 import com.afraz.campusos.data.AppDatabase
 import com.afraz.campusos.data.ExpenseGroupEntity
 import com.afraz.campusos.data.ExpenseSplitEntity
@@ -130,7 +131,7 @@ class ToolkitViewModel @Inject constructor(
 
     fun deleteDocument(id: String) = viewModelScope.launch(Dispatchers.IO) {
         val doc = database.walletDocDao().getAll().firstOrNull { it.id == id } ?: return@launch
-        File(doc.localFilePath).delete()
+        LocalDocumentPaths.resolveManagedFile(context, doc.localFilePath)?.delete()
         database.walletDocDao().delete(id)
     }
 }
