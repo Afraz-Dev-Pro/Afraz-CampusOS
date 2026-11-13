@@ -142,7 +142,10 @@ private class SizeLimitedInputStream(input: InputStream, private val maxBytes: L
 
     override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
         if (length == 0) return 0
-        if (bytesRead >= maxBytes) return read().let { if (it == -1) -1 else buffer[offset].toInt() }
+        if (bytesRead >= maxBytes) {
+            read()
+            return -1
+        }
         val allowedLength = minOf(length.toLong(), maxBytes - bytesRead).toInt()
         val count = super.read(buffer, offset, allowedLength)
         if (count > 0) bytesRead += count
