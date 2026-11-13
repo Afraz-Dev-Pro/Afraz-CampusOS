@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS"><img src="https://img.shields.io/badge/Release-v1.1.3-6366F1?style=for-the-badge&logo=android&logoColor=white" alt="CampusOS v1.1.3" /></a>
+  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A"><img src="https://img.shields.io/badge/Release-V1.4A-6366F1?style=for-the-badge&logo=android&logoColor=white" alt="CampusOS V1.4A release" /></a>
   <a href="https://developer.android.com/"><img src="https://img.shields.io/badge/Android-8.0%2B%20(API%2026)-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android 8.0 and newer" /></a>
   <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin 2.0.21" /></a>
   <a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose and Material 3" /></a>
@@ -28,7 +28,34 @@
 
 CampusOS brings the tools students reach for every day into one thoughtfully designed, offline-first Android experience. See what is next, keep your timetable close, track your progress, and get back to the work that matters.
 
-> **Current build:** v1.1.3 · `com.afraz.campusos` · version code `5`
+> **Current build:** v1.1.3 · `com.afraz.campusos` · version code `5`  
+> **Published release:** [CampusOS V1.4A](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A) · [Download APK](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/download/V1.4A/Afraz.CampusOS.V1.4A.apk)
+
+---
+
+## 📥 Download CampusOS for Android
+
+<p align="center">
+  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A">
+    <img src="https://img.shields.io/badge/Download%20CampusOS-V1.4A-635BEB?style=for-the-badge&logo=android&logoColor=white" alt="Download CampusOS V1.4A" />
+  </a>
+  &nbsp;
+  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/download/V1.4A/Afraz.CampusOS.V1.4A.apk">
+    <img src="https://img.shields.io/badge/Direct%20APK-Install%20on%20Android-16A085?style=for-the-badge&logo=github&logoColor=white" alt="Download the V1.4A APK" />
+  </a>
+</p>
+
+Download the APK from the official [V1.4A release page](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A), then open it on your Android phone and follow the installer prompts. Android may ask you to allow installs from the browser or file manager you used. Only install APKs you trust.
+
+---
+
+## 📱 App Showcase
+
+<p align="center">
+  <img src="assets/screenshots/campusos-showcase.svg" width="100%" alt="CampusOS visual preview of Dashboard, Academics, Toolkit, Finance and HackHub" />
+</p>
+
+<p align="center"><sub>A visual tour of the five CampusOS spaces and the everyday tools inside them.</sub></p>
 
 ---
 
@@ -37,44 +64,44 @@ CampusOS brings the tools students reach for every day into one thoughtfully des
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3>📚 Academics</h3>
-      <p>Build a weekly timetable, attach a campus schedule, check attendance, manage tasks, track syllabus progress, estimate grades, and browse past papers.</p>
+      <h3>🏠 Dashboard</h3>
+      <p>Start with the next class, attendance snapshot, urgent tasks, and your saved timetable. Jump straight to Digital ID, spending, or a focus session. The home-screen widget keeps key details close.</p>
     </td>
     <td width="50%" valign="top">
-      <h3>⌂ Dashboard</h3>
-      <p>See your next class, attendance snapshot, urgent deadlines, saved timetable, and shortcuts to the tools you use most.</p>
+      <h3>📚 Academics</h3>
+      <p>Create a weekly timetable manually, or attach a timetable image or PDF. Track attendance with the Bunk Meter, set class reminders, manage tasks and syllabus progress, calculate CGPA goals, and browse the PYQ Vault.</p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <h3>🧰 Toolkit</h3>
-      <p>Scan notes, make PDFs from text, photos, or camera captures, keep campus IDs in a document wallet, and run a focus timer.</p>
+      <p>Scan documents, make a PDF from text or multiple camera photos, keep campus IDs and hall tickets in the Digital ID wallet, and use the Pomodoro focus timer. Quick Settings gives fast access to scanning.</p>
     </td>
     <td width="50%" valign="top">
       <h3>💸 Finance</h3>
-      <p>Track personal spending, set a monthly budget, split a total by any number of people, or manage friend-by-friend UPI bills.</p>
+      <p>Record personal expenses by category, set a monthly budget, split a bill equally by a chosen number of people, or track custom shares with friends and UPI IDs.</p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <h3>🚀 HackHub</h3>
-      <p>Find project teammates, browse hackathons, and explore cached community feeds with bundled starter data.</p>
+      <p>Find project teammates, browse hackathon feeds, and explore community resources. Cached feeds and bundled starter data help keep listings available.</p>
     </td>
     <td width="50%" valign="top">
-      <h3>📲 Native Android</h3>
-      <p>Get class and deadline reminders, a home-screen widget, and a Quick Settings tile for fast scanning.</p>
+      <h3>🔒 Private by default</h3>
+      <p>Academic, finance, and toolkit information is stored on your device. Sign-in is only needed when you choose a cloud or community feature.</p>
     </td>
   </tr>
 </table>
 
-### Small details, made useful
+### A few thoughtful details
 
-- **Timetable that travels with you:** add a timetable image or PDF, share a schedule with a QR code, or add course slots manually.
-- **Attendance with context:** log present or absent, undo the last entry, and see when you can safely miss or need to attend.
-- **Grades with a goal:** calculate SGPA from course grades and estimate the average needed for a target CGPA.
-- **Paper to PDF:** select photos or capture several pages in a row, then save them as one PDF.
-- **A practical split calculator:** divide a total across a chosen number of people; extra paise are handled so the shares still equal the bill.
-- **Private by default:** academic and personal toolkit data stays on device. Sign-in is requested only for community posting or cloud backup.
+- **Timetable your way:** add courses and time slots yourself, import a timetable image or PDF, or share a schedule with a QR code.
+- **Know your attendance margin:** record attendance, see your current percentage, and understand how absences affect your target.
+- **Keep study work moving:** combine deadlines, syllabus progress, and grade planning in one academic space.
+- **Capture a stack of pages:** scan notes or take multiple photos in sequence and turn them into one PDF.
+- **Split the bill clearly:** divide ₹100 among 5 people as ₹20 each, or enter custom friend shares when the split is uneven.
+- **Keep campus essentials handy:** open your Digital ID shortcut, set a focus block, or check the dashboard widget without digging through menus.
 
 ---
 
