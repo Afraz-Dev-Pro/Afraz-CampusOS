@@ -4,11 +4,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
 @Composable
 fun NumberText(value: String, modifier: Modifier = Modifier, fontSize: TextUnit = 16.sp) {
-    Text(value, modifier = modifier, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontFeatureSettings = "\"tnum\"", fontSize = fontSize)
+    Text(value, modifier = modifier, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = fontSize, style = TextStyle(fontFeatureSettings = "\"tnum\""))
 }
