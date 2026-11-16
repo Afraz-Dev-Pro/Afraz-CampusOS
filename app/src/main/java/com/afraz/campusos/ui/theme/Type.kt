@@ -4,10 +4,9 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontFeature
 import androidx.compose.ui.unit.sp
 
-private val TabularNumerals = FontFeature.tabularNumbers()
+private const val TabularNumerals = "\"tnum\""
 
 val NumberTextLarge = TextStyle(
     fontFamily = FontFamily.Monospace,
