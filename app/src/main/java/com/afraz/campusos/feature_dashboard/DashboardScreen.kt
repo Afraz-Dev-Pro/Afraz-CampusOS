@@ -70,7 +70,7 @@ fun DashboardScreen(
         item {
             Spacer(Modifier.height(16.dp))
             Text("CAMPUSOS / STUDENT SPACE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            Text("Your campus, in one place", color = TextPrimary, fontSize = 27.sp, fontWeight = FontWeight.Bold)
+            Text("Home", color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         }
         item {
             GlassCard {

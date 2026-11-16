@@ -77,7 +77,7 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
     LazyColumn(modifier.fillMaxSize().padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Spacer(Modifier.height(16.dp))
-            Text("HackHub", color = TextPrimary, fontSize = 29.sp, fontWeight = FontWeight.Bold)
+            Text("HackHub", color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Text("Find teammates, events and past papers.", color = TextSecondary)
         }
         item {

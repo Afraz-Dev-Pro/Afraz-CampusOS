@@ -167,7 +167,7 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
     LazyColumn(modifier.fillMaxSize().padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Spacer(Modifier.height(16.dp))
-            Text(if (financeOnly) "Finance" else if (walletOnly) "Digital ID" else "Toolkit", color = TextPrimary, fontSize = 29.sp, fontWeight = FontWeight.Bold)
+            Text(if (financeOnly) "Finance" else if (walletOnly) "Digital ID" else "Tools", color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Text(if (financeOnly) "Personal spending, UPI and bill splits." else if (walletOnly) "Your campus documents, ready when you need them." else "Campus helpers that work offline.", color = TextSecondary)
         }
         if (!financeOnly && !walletOnly) item {

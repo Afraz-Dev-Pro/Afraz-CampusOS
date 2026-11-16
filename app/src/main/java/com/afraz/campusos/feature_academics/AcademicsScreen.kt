@@ -120,7 +120,7 @@ fun AcademicsScreen(modifier: Modifier = Modifier, viewModel: AcademicsViewModel
     LazyColumn(modifier.padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Spacer(Modifier.height(16.dp))
-            Text("Academics", color = TextPrimary, fontSize = 29.sp, fontWeight = FontWeight.Bold)
+            Text("Classes", color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Text("Your timetable, attendance and progress stay on this device.", color = TextSecondary)
         }
         item {
