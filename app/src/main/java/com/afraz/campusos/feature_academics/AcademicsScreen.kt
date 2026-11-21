@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -104,6 +105,7 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
     var selectedCourseId by remember { mutableStateOf("") }
     var showCourseSheet by remember { mutableStateOf(false) }
     var showAcademicTools by remember { mutableStateOf(false) }
+    var showPyqVault by remember { mutableStateOf(false) }
     var gradeSemester by remember { mutableStateOf("1") }
     var sgpa by remember { mutableStateOf("") }
     var targetCgpa by remember { mutableStateOf("8.0") }
@@ -151,14 +153,28 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     items(dayNames.take(6).size) { index ->
                         val dayNumber = index + 1
-                        Button(
-                            onClick = { viewModel.selectDay(dayNumber) },
-                            modifier = Modifier.heightIn(min = 48.dp).width(56.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                containerColor = if (state.selectedDay == dayNumber) LocalCampusColors.current.accentPrimary else LocalCampusColors.current.surfaceElevated
-                            )
-                        ) { Text(dayNames[index], maxLines = 1) }
+                        val selected = state.selectedDay == dayNumber
+                        if (selected) {
+                            Button(
+                                onClick = { viewModel.selectDay(dayNumber) },
+                                modifier = Modifier.heightIn(min = 48.dp).width(48.dp),
+                                contentPadding = PaddingValues(horizontal = 2.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = LocalCampusColors.current.accentPrimary,
+                                    contentColor = LocalCampusColors.current.heroCardText
+                                )
+                            ) { Text(dayNames[index], maxLines = 1, fontSize = 12.sp) }
+                        } else {
+                            OutlinedButton(
+                                onClick = { viewModel.selectDay(dayNumber) },
+                                modifier = Modifier.heightIn(min = 48.dp).width(48.dp),
+                                contentPadding = PaddingValues(horizontal = 2.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, LocalCampusColors.current.borderSubtle),
+                                colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(contentColor = LocalCampusColors.current.textSecondary)
+                            ) { Text(dayNames[index], maxLines = 1, fontSize = 12.sp) }
+                        }
                     }
                 }
                 Spacer(Modifier.height(8.dp))
@@ -263,23 +279,6 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
         }
         item {
             GlassCard {
-                Text("PYQ VAULT", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                OutlinedTextField(pyqSearch, { pyqSearch = it }, label = { Text("Search subject, code or semester") }, modifier = Modifier.fillMaxWidth())
-                val papers = state.pyqs.filter { paper -> pyqSearch.isBlank() || paper.subjectName.contains(pyqSearch, true) || paper.courseCode.contains(pyqSearch, true) || paper.semester.toString() == pyqSearch }
-                if (papers.isEmpty()) Text("No papers match this search yet.", color = LocalCampusColors.current.textSecondary)
-                papers.forEach { paper ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(paper.subjectName, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
-                            Text("${paper.courseCode} · semester ${paper.semester} · ${paper.year}", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
-                        }
-                        Button(onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(paper.pdfUrl))) } }) { Text("Open PDF") }
-                    }
-                }
-            }
-        }
-        item {
-            GlassCard {
                 Text("ASSIGNMENTS & EXAMS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(taskTitle, { taskTitle = it }, label = { Text("Task title") }, modifier = Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -334,8 +333,11 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
         item {
             GlassCard {
                 Text("ACADEMIC TOOLS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Keep grade planning separate from your daily timetable.", color = LocalCampusColors.current.textSecondary, fontSize = 13.sp)
-                Button(onClick = { showAcademicTools = true }) { Text("Open SGPA & CGPA calculator") }
+                Text("Study resources and grade planning, kept separate from your timetable.", color = LocalCampusColors.current.textSecondary, fontSize = 13.sp)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(onClick = { showAcademicTools = true }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text("SGPA & CGPA", maxLines = 1) }
+                    OutlinedButton(onClick = { showPyqVault = true }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text("Previous Papers", maxLines = 1) }
+                }
             }
         }
         item { Spacer(Modifier.height(16.dp)) }
@@ -375,6 +377,27 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
                     val remaining = count - state.grades.size
                     val required = if (remaining == 0) 0.0 else ((target * count - state.grades.sumOf { it.sgpa }) / remaining)
                     Text(if (remaining == 0) "All semesters are recorded" else "Required average in next $remaining semesters: ${"%.2f".format(required)} SGPA", color = if (required > 10.0) LocalCampusColors.current.statusDanger else LocalCampusColors.current.textPrimary)
+                }
+            }
+        }
+    }
+    if (showPyqVault) {
+        ModalBottomSheet(onDismissRequest = { showPyqVault = false }) {
+            Column(
+                Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text("PREVIOUS YEAR PAPERS", color = LocalCampusColors.current.textPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text("Search papers independently from the SGPA and CGPA calculator.", color = LocalCampusColors.current.textSecondary)
+                OutlinedTextField(pyqSearch, { pyqSearch = it }, label = { Text("Search subject, code or semester") }, modifier = Modifier.fillMaxWidth())
+                val papers = state.pyqs.filter { paper -> pyqSearch.isBlank() || paper.subjectName.contains(pyqSearch, true) || paper.courseCode.contains(pyqSearch, true) || paper.semester.toString() == pyqSearch }
+                if (papers.isEmpty()) Text("No papers match this search yet.", color = LocalCampusColors.current.textSecondary)
+                papers.forEach { paper ->
+                    GlassCard(Modifier.fillMaxWidth()) {
+                        Text(paper.subjectName, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                        Text("${paper.courseCode} · semester ${paper.semester} · ${paper.year}", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
+                        Button(onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(paper.pdfUrl))) } }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Open PDF") }
+                    }
                 }
             }
         }

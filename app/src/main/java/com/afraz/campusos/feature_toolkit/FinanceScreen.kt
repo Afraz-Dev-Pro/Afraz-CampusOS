@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DirectionsSubway
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Restaurant
@@ -32,6 +35,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -88,6 +92,9 @@ fun FinanceScreen(modifier: Modifier = Modifier, viewModel: FinanceViewModel = h
     val lifecycleOwner = LocalLifecycleOwner.current
     val haptics = LocalHapticFeedback.current
     var showAddExpense by remember { mutableStateOf(false) }
+    var expenseBeingEdited by remember { mutableStateOf<PersonalExpenseEntity?>(null) }
+    var expensePendingDelete by remember { mutableStateOf<PersonalExpenseEntity?>(null) }
+    var showSplitBill by remember { mutableStateOf(false) }
     var selectedForHandoff by remember { mutableStateOf<Pair<ExpenseSplitEntity, String>?>(null) }
     var awaitingReturn by remember { mutableStateOf(false) }
     var handoffWaitingOn by remember { mutableStateOf<Pair<ExpenseSplitEntity, String>?>(null) }
@@ -119,17 +126,10 @@ fun FinanceScreen(modifier: Modifier = Modifier, viewModel: FinanceViewModel = h
     androidx.compose.material3.Scaffold(
         modifier = modifier,
         containerColor = Color.Transparent,
-        floatingActionButton = {
-            Button(onClick = { showAddExpense = true }) {
-                Icon(Icons.Filled.Add, contentDescription = "Add expense")
-                Spacer(Modifier.size(8.dp))
-                Text("Add Expense")
-            }
-        }
     ) { insets ->
         LazyColumn(
             Modifier.fillMaxSize().padding(insets).padding(horizontal = 18.dp),
-            contentPadding = PaddingValues(top = 12.dp, bottom = 88.dp),
+            contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
@@ -146,28 +146,62 @@ fun FinanceScreen(modifier: Modifier = Modifier, viewModel: FinanceViewModel = h
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                             BudgetOverview(monthSpent, state.monthlyBudgetPaise, currentMonthBudget, onBudgetChange = { currentMonthBudget = it }, onSaveBudget = { viewModel.setMonthlyBudget(currentMonthBudget) })
                             CategoryBreakdown(monthExpenses)
-                            SplitBalances(state, splitGroups, onSettle = openHandoff)
+                            SplitBalances(state, splitGroups, onSettle = openHandoff, onCreateSplit = { showSplitBill = true }, onMarkReceived = { pendingConfirmation = it to (splitGroups[it.groupId]?.title ?: "Group expense") })
                         }
                         Column(Modifier.weight(1f)) {
-                            TransactionList(monthExpenses, Modifier.fillMaxWidth())
+                            Button(onClick = { expenseBeingEdited = null; showAddExpense = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                                Icon(Icons.Filled.Add, contentDescription = null)
+                                Spacer(Modifier.size(8.dp))
+                                Text("Add Expense")
+                            }
+                            TransactionList(monthExpenses, Modifier.fillMaxWidth(), onEdit = { expenseBeingEdited = it; showAddExpense = true }, onDelete = { expensePendingDelete = it })
                         }
                     }
                 }
             } else {
                 item { BudgetOverview(monthSpent, state.monthlyBudgetPaise, currentMonthBudget, onBudgetChange = { currentMonthBudget = it }, onSaveBudget = { viewModel.setMonthlyBudget(currentMonthBudget) }) }
                 item { CategoryBreakdown(monthExpenses) }
-                item { TransactionList(monthExpenses, Modifier.fillMaxWidth()) }
-                item { SplitBalances(state, splitGroups, onSettle = openHandoff) }
+                item {
+                    Button(onClick = { expenseBeingEdited = null; showAddExpense = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                        Icon(Icons.Filled.Add, contentDescription = null)
+                        Spacer(Modifier.size(8.dp))
+                        Text("Add Expense")
+                    }
+                }
+                item { TransactionList(monthExpenses, Modifier.fillMaxWidth(), onEdit = { expenseBeingEdited = it; showAddExpense = true }, onDelete = { expensePendingDelete = it }) }
+                item { SplitBalances(state, splitGroups, onSettle = openHandoff, onCreateSplit = { showSplitBill = true }, onMarkReceived = { pendingConfirmation = it to (splitGroups[it.groupId]?.title ?: "Group expense") }) }
             }
         }
     }
 
     if (showAddExpense) {
         AddExpenseSheet(
+            initialExpense = expenseBeingEdited,
             onDismiss = { showAddExpense = false },
-            onSave = { note, category, amount, timestamp ->
-                viewModel.addExpense(note, category, amount, timestamp)
+            onSave = { id, note, category, amount, timestamp ->
+                viewModel.saveExpense(id, note, category, amount, timestamp)
                 showAddExpense = false
+                expenseBeingEdited = null
+            }
+        )
+    }
+    expensePendingDelete?.let { expense ->
+        AlertDialog(
+            onDismissRequest = { expensePendingDelete = null },
+            title = { Text("Remove expense?") },
+            text = { Text("${expense.title} · ${formatMoney(expense.amountPaise)} will be deleted.") },
+            confirmButton = { TextButton(onClick = { viewModel.deleteExpense(expense.id); expensePendingDelete = null }) { Text("Remove") } },
+            dismissButton = { TextButton(onClick = { expensePendingDelete = null }) { Text("Cancel") } }
+        )
+    }
+    if (showSplitBill) {
+        SplitBillSheet(
+            friends = state.friends,
+            onAddFriend = viewModel::addFriend,
+            onDismiss = { showSplitBill = false },
+            onCreate = { title, amount, friendIds, payer, shares ->
+                viewModel.createBillSplit(title, amount, friendIds, payer, shares)
+                showSplitBill = false
             }
         )
     }
@@ -194,7 +228,7 @@ fun FinanceScreen(modifier: Modifier = Modifier, viewModel: FinanceViewModel = h
         AlertDialog(
             onDismissRequest = { pendingConfirmation = null },
             title = { Text("Confirm payment") },
-            text = { Text("Did you complete the payment to ${split.friendName}?") },
+            text = { Text(if (split.direction == "YOU_OWE") "Did you complete the payment to ${split.friendName}?" else "Did ${split.friendName} repay their share?") },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.setSettled(split.id, true)
@@ -254,7 +288,13 @@ private fun CategoryBreakdown(expenses: List<PersonalExpenseEntity>) {
 }
 
 @Composable
-private fun TransactionList(expenses: List<PersonalExpenseEntity>, modifier: Modifier = Modifier) {
+private fun TransactionList(
+    expenses: List<PersonalExpenseEntity>,
+    modifier: Modifier = Modifier,
+    onEdit: (PersonalExpenseEntity) -> Unit,
+    onDelete: (PersonalExpenseEntity) -> Unit
+) {
+    val compact = LocalConfiguration.current.screenWidthDp < 380
     GlassCard(modifier) {
         Text("TRANSACTIONS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         if (expenses.isEmpty()) {
@@ -264,15 +304,30 @@ private fun TransactionList(expenses: List<PersonalExpenseEntity>, modifier: Mod
             grouped.forEach { (day, dayExpenses) ->
                 Text(DateFormat.getDateInstance(DateFormat.FULL).format(Date(day)), color = LocalCampusColors.current.textSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp))
                 dayExpenses.forEach { expense ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Surface(color = LocalCampusColors.current.surfaceElevated, shape = CircleShape, modifier = Modifier.size(38.dp)) {
-                            Icon(categoryIcon(normalizeCategory(expense.category)), contentDescription = "${normalizeCategory(expense.category)} transaction", tint = LocalCampusColors.current.accentPrimary, modifier = Modifier.padding(9.dp))
+                    if (compact) {
+                        Column(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                TransactionCategoryIcon(expense)
+                                Column(Modifier.weight(1f)) {
+                                    Text(expense.title, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                                    Text(normalizeCategory(expense.category), color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
+                                }
+                                NumberText("−${formatMoney(expense.amountPaise)}", fontSize = 13.sp)
+                            }
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                                TransactionActions(expense, onEdit, onDelete)
+                            }
                         }
-                        Column(Modifier.weight(1f)) {
-                            Text(expense.title, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
-                            Text(normalizeCategory(expense.category), color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
+                    } else {
+                        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            TransactionCategoryIcon(expense)
+                            Column(Modifier.weight(1f)) {
+                                Text(expense.title, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                                Text(normalizeCategory(expense.category), color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
+                            }
+                            NumberText("−${formatMoney(expense.amountPaise)}", fontSize = 13.sp)
+                            TransactionActions(expense, onEdit, onDelete)
                         }
-                        NumberText("−${formatMoney(expense.amountPaise)}", fontSize = 14.sp)
                     }
                 }
             }
@@ -281,16 +336,45 @@ private fun TransactionList(expenses: List<PersonalExpenseEntity>, modifier: Mod
 }
 
 @Composable
+private fun TransactionCategoryIcon(expense: PersonalExpenseEntity) {
+    Surface(color = LocalCampusColors.current.surfaceElevated, shape = CircleShape, modifier = Modifier.size(38.dp)) {
+        Icon(categoryIcon(normalizeCategory(expense.category)), contentDescription = "${normalizeCategory(expense.category)} transaction", tint = LocalCampusColors.current.accentPrimary, modifier = Modifier.padding(9.dp))
+    }
+}
+
+@Composable
+private fun TransactionActions(
+    expense: PersonalExpenseEntity,
+    onEdit: (PersonalExpenseEntity) -> Unit,
+    onDelete: (PersonalExpenseEntity) -> Unit
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        IconButton(onClick = { onEdit(expense) }, modifier = Modifier.size(48.dp)) {
+            Icon(Icons.Filled.Edit, contentDescription = "Edit ${expense.title}", tint = LocalCampusColors.current.accentPrimary, modifier = Modifier.size(19.dp))
+        }
+        IconButton(onClick = { onDelete(expense) }, modifier = Modifier.size(48.dp)) {
+            Icon(Icons.Filled.Delete, contentDescription = "Remove ${expense.title}", tint = LocalCampusColors.current.statusDanger, modifier = Modifier.size(19.dp))
+        }
+    }
+}
+
+@Composable
 private fun SplitBalances(
     state: FinanceState,
     groups: Map<String, ExpenseGroupEntity>,
-    onSettle: (ExpenseSplitEntity, String) -> Unit
+    onSettle: (ExpenseSplitEntity, String) -> Unit,
+    onCreateSplit: () -> Unit,
+    onMarkReceived: (ExpenseSplitEntity) -> Unit
 ) {
-    val unsettled = state.splits.filterNot(ExpenseSplitEntity::isSettled)
+    val outgoing = state.splits.filter { !it.isSettled && it.direction == "YOU_OWE" }
+    val incoming = state.splits.filter { !it.isSettled && it.direction == "OWED_TO_YOU" }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("GROUP SPLITS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        SplitBalanceCard("You owe", "Outgoing payments", LocalCampusColors.current.statusDanger, unsettled, groups, onSettle, "No unpaid group splits.")
-        SplitBalanceCard("Owed to you", "Incoming balances", LocalCampusColors.current.statusSafe, emptyList(), groups, onSettle, "No incoming balances are recorded yet.")
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text("GROUP SPLITS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            Button(onClick = onCreateSplit, modifier = Modifier.heightIn(min = 48.dp)) { Text("Split a bill") }
+        }
+        SplitBalanceCard("You owe", "Outgoing payments", LocalCampusColors.current.statusDanger, outgoing, groups, onSettle, { }, "No unpaid group splits.")
+        SplitBalanceCard("Owed to you", "Incoming balances", LocalCampusColors.current.statusSafe, incoming, groups, { _, _ -> }, onMarkReceived, "No incoming balances are recorded yet.")
     }
 }
 
@@ -302,6 +386,7 @@ private fun SplitBalanceCard(
     splits: List<ExpenseSplitEntity>,
     groups: Map<String, ExpenseGroupEntity>,
     onSettle: (ExpenseSplitEntity, String) -> Unit,
+    onMarkReceived: (ExpenseSplitEntity) -> Unit,
     emptyText: String
 ) {
     Surface(color = LocalCampusColors.current.surfacePrimary, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
@@ -317,7 +402,11 @@ private fun SplitBalanceCard(
                         Text("$groupTitle · Unsettled", color = tint, fontSize = 12.sp)
                         NumberText(formatMoney(split.shareAmountPaise), fontSize = 14.sp)
                     }
-                    Button(onClick = { onSettle(split, groupTitle) }) { Text("Settle up") }
+                    if (split.direction == "YOU_OWE") {
+                        Button(onClick = { onSettle(split, groupTitle) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Settle up") }
+                    } else {
+                        OutlinedButton(onClick = { onMarkReceived(split) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Mark received") }
+                    }
                 }
             }
         }
@@ -326,11 +415,15 @@ private fun SplitBalanceCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AddExpenseSheet(onDismiss: () -> Unit, onSave: (String, String, String, Long) -> Unit) {
-    var amount by remember { mutableStateOf("") }
-    var note by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf(financeCategories.first()) }
-    var selectedDate by remember { mutableStateOf(System.currentTimeMillis()) }
+private fun AddExpenseSheet(
+    initialExpense: PersonalExpenseEntity?,
+    onDismiss: () -> Unit,
+    onSave: (String?, String, String, String, Long) -> Unit
+) {
+    var amount by remember(initialExpense?.id) { mutableStateOf(initialExpense?.let { BigDecimal.valueOf(it.amountPaise, 2).toPlainString() }.orEmpty()) }
+    var note by remember(initialExpense?.id) { mutableStateOf(initialExpense?.title.orEmpty()) }
+    var category by remember(initialExpense?.id) { mutableStateOf(initialExpense?.category?.let(::normalizeCategory) ?: financeCategories.first()) }
+    var selectedDate by remember(initialExpense?.id) { mutableStateOf(initialExpense?.timestamp ?: System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -342,7 +435,7 @@ private fun AddExpenseSheet(onDismiss: () -> Unit, onSave: (String, String, Stri
             Modifier.fillMaxWidth().imePadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Add expense", color = LocalCampusColors.current.textPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text(if (initialExpense == null) "Add expense" else "Edit expense", color = LocalCampusColors.current.textPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
             OutlinedTextField(amount, { amount = it.filter { ch -> ch.isDigit() || ch == '.' }.take(12) }, label = { Text("Amount ₹") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             Text("CATEGORY", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             financeCategories.chunked(2).forEach { row ->
@@ -358,7 +451,7 @@ private fun AddExpenseSheet(onDismiss: () -> Unit, onSave: (String, String, Stri
                 Text("Date · ${DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(selectedDate))}")
             }
             OutlinedTextField(note, { note = it }, label = { Text("Note (optional)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            Button(onClick = { onSave(note, category, amount, selectedDate) }, enabled = amount.toBigDecimalOrNull()?.signum() == 1, modifier = Modifier.fillMaxWidth()) { Text("Save expense") }
+            Button(onClick = { onSave(initialExpense?.id, note, category, amount, selectedDate) }, enabled = amount.toBigDecimalOrNull()?.signum() == 1, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(if (initialExpense == null) "Save expense" else "Save changes") }
         }
     }
     if (showDatePicker) {
@@ -373,6 +466,109 @@ private fun AddExpenseSheet(onDismiss: () -> Unit, onSave: (String, String, Stri
             },
             dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } }
         ) { DatePicker(state = pickerState) }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SplitBillSheet(
+    friends: List<com.afraz.campusos.data.FriendContactEntity>,
+    onAddFriend: (String, String) -> Unit,
+    onDismiss: () -> Unit,
+    onCreate: (String, String, List<String>, String?, List<String>?) -> Unit
+) {
+    var title by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf("") }
+    var friendName by remember { mutableStateOf("") }
+    var friendUpi by remember { mutableStateOf("") }
+    var selectedIds by remember { mutableStateOf(setOf<String>()) }
+    var payerFriendId by remember { mutableStateOf<String?>(null) }
+    var customSplit by remember { mutableStateOf(false) }
+    val customShares = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateMapOf<String, String>() }
+    var yourShare by remember { mutableStateOf("") }
+    val selectedFriends = friends.filter { it.id in selectedIds }
+    val parsedTotal = amount.toBigDecimalOrNull()
+    val customValues = if (payerFriendId == null) selectedFriends.map { customShares[it.id]?.toBigDecimalOrNull() } else listOf(yourShare.toBigDecimalOrNull())
+    val customValid = !customSplit || (customValues.isNotEmpty() && customValues.all { it != null && it.signum() > 0 } &&
+        customValues.filterNotNull().fold(BigDecimal.ZERO, BigDecimal::add) <= (parsedTotal ?: BigDecimal.ZERO))
+    val canCreate = title.isNotBlank() && (parsedTotal?.signum() ?: 0) > 0 && selectedFriends.isNotEmpty() && customValid
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = LocalCampusColors.current.surfaceElevated,
+        contentWindowInsets = { WindowInsets(0, 0, 0, 0) }
+    ) {
+        Column(
+            Modifier.fillMaxWidth().imePadding().navigationBarsPadding().verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp).padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text("Split a bill", color = LocalCampusColors.current.textPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("Save each person’s share and settle your part with UPI.", color = LocalCampusColors.current.textSecondary)
+            OutlinedTextField(title, { title = it.take(60) }, label = { Text("Bill or group name") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(amount, { amount = it.filter { c -> c.isDigit() || c == '.' }.take(12) }, label = { Text("Total bill · ₹") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            Text("WHO PAID?", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = payerFriendId == null, onClick = { payerFriendId = null }, label = { Text("I paid") })
+                if (payerFriendId != null) {
+                    val payer = selectedFriends.firstOrNull { it.id == payerFriendId }
+                    FilterChip(selected = true, onClick = { payerFriendId = null }, label = { Text("${payer?.name ?: "Friend"} paid") })
+                }
+            }
+            Text("PARTICIPANTS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            if (friends.isEmpty()) Text("Add a friend with their UPI ID to start a split.", color = LocalCampusColors.current.textSecondary)
+            friends.forEach { friend ->
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = friend.id in selectedIds,
+                        onClick = {
+                            selectedIds = if (friend.id in selectedIds) selectedIds - friend.id else selectedIds + friend.id
+                            if (friend.id !in selectedIds && payerFriendId == friend.id) payerFriendId = null
+                        },
+                        label = { Text("${friend.name} · ${friend.upiId}") },
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (friend.id in selectedIds && payerFriendId == null) {
+                        OutlinedButton(onClick = { payerFriendId = friend.id }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Paid") }
+                    }
+                }
+            }
+            OutlinedTextField(friendName, { friendName = it.take(40) }, label = { Text("Add friend name") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(friendUpi, { friendUpi = it.take(100) }, label = { Text("Friend UPI ID") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedButton(
+                onClick = { onAddFriend(friendName, friendUpi); friendName = ""; friendUpi = "" },
+                enabled = friendName.isNotBlank() && friendUpi.contains('@'),
+                modifier = Modifier.heightIn(min = 48.dp)
+            ) { Text("Save friend") }
+            FilterChip(selected = customSplit, onClick = { customSplit = !customSplit }, label = { Text(if (customSplit) "Custom shares" else "Use equal split") })
+            if (customSplit) {
+                if (payerFriendId == null) {
+                    selectedFriends.forEach { friend ->
+                        OutlinedTextField(
+                            customShares[friend.id].orEmpty(),
+                            { customShares[friend.id] = it.filter { c -> c.isDigit() || c == '.' } },
+                            label = { Text("${friend.name} share · ₹") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
+                } else {
+                    OutlinedTextField(yourShare, { yourShare = it.filter { c -> c.isDigit() || c == '.' } }, label = { Text("Your share · ₹") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                }
+                if (!customValid) Text("Enter positive shares that do not exceed the total bill.", color = LocalCampusColors.current.statusDanger, fontSize = 12.sp)
+            }
+            Button(
+                onClick = {
+                    val ids = selectedFriends.map { it.id }
+                    val payer = payerFriendId
+                    val shares = if (!customSplit) null else if (payer == null) selectedFriends.map { customShares[it.id].orEmpty() } else listOf(yourShare)
+                    onCreate(title, amount, ids, payer, shares)
+                },
+                enabled = canCreate,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+            ) { Text("Create bill split") }
+        }
     }
 }
 

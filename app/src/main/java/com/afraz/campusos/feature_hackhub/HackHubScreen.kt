@@ -93,12 +93,12 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
         item {
             Spacer(Modifier.height(16.dp))
             Text("HackHub", color = LocalCampusColors.current.textPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-            Text("Find teammates, events and past papers.", color = LocalCampusColors.current.textSecondary)
+            Text("Find teammates, hackathons and sponsor bounties.", color = LocalCampusColors.current.textSecondary)
             Text(if (online) "Online · Community and feeds available" else "Offline · Showing cached items", color = LocalCampusColors.current.textSecondary, modifier = Modifier.padding(top = 8.dp))
         }
         item {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("Teammates", "Hackathons & Bounties", "Previous Papers").forEach { view ->
+                listOf("Teammates", "Hackathons & Bounties").forEach { view ->
                     Button(onClick = { selectedView = view }, modifier = Modifier.heightIn(min = 48.dp)) { Text(if (selectedView == view) "✓ $view" else view) }
                 }
             }
@@ -139,19 +139,6 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
                 if (visiblePosts.isEmpty() && !state.loading) Text("No active teammate requests yet.", color = LocalCampusColors.current.textSecondary)
                 visiblePosts.forEach { post -> TeammateCard(post) { openExternal(context, connectUrl(post)) } }
                 Button(onClick = viewModel::loadMore, enabled = state.teammatePosts.isNotEmpty() && !state.loadingMore) { Text(if (state.loadingMore) "Loading…" else "Load more") }
-            }
-        }
-        if (selectedView == "Previous Papers") item {
-            GlassCard {
-                Text("PREVIOUS PAPERS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                if (state.pyqs.isEmpty()) Text("No previous papers are available in the cached feed yet.", color = LocalCampusColors.current.textSecondary)
-                state.pyqs.forEach { paper ->
-                    Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                        Text(paper.subjectName, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
-                        Text("${paper.courseCode} · Semester ${paper.semester} · ${paper.year}", color = LocalCampusColors.current.textSecondary)
-                        Button(onClick = { openExternal(context, paper.pdfUrl) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Open paper") }
-                    }
-                }
             }
         }
         state.error?.let { error -> item { Text(error, color = androidx.compose.material3.MaterialTheme.colorScheme.error) } }

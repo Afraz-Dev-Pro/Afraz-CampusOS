@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -29,6 +30,7 @@ fun GlassCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.()
             .background(colors.surfacePrimary)
             .border(1.dp, colors.borderSubtle, shape)
             .padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         content = content
     )
 }
