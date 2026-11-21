@@ -49,7 +49,7 @@ data class AcademicsState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class AcademicsViewModel @Inject constructor(
+class ClassesViewModel @Inject constructor(
     private val database: AppDatabase,
     private val alarmScheduler: CampusAlarmScheduler,
     private val settings: DataStore<Preferences>,
@@ -165,3 +165,5 @@ class AcademicsViewModel @Inject constructor(
 
     private fun refreshWidget() = viewModelScope.launch(Dispatchers.IO) { CampusGlanceWidget().updateAll(context) }
 }
+
+typealias AcademicsViewModel = ClassesViewModel
