@@ -128,7 +128,7 @@ fun FinanceScreen(modifier: Modifier = Modifier, viewModel: FinanceViewModel = h
         containerColor = Color.Transparent,
         floatingActionButton = {
             Button(onClick = { showAddExpense = true }) {
-                Icon(Icons.Filled.Add, contentDescription = null)
+                Icon(Icons.Filled.Add, contentDescription = "Add expense")
                 Spacer(Modifier.size(8.dp))
                 Text("Add Expense")
             }
@@ -247,7 +247,7 @@ private fun CategoryBreakdown(expenses: List<PersonalExpenseEntity>) {
         Text("CATEGORY BREAKDOWN", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         financeCategories.forEach { category ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Icon(categoryIcon(category), contentDescription = null, tint = AccentIndigo, modifier = Modifier.size(20.dp))
+                Icon(categoryIcon(category), contentDescription = "${category} category", tint = AccentIndigo, modifier = Modifier.size(20.dp))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(category, color = TextPrimary, fontSize = 13.sp)
@@ -273,7 +273,7 @@ private fun TransactionList(expenses: List<PersonalExpenseEntity>, modifier: Mod
                 dayExpenses.forEach { expense ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Surface(color = SurfaceElevated, shape = CircleShape, modifier = Modifier.size(38.dp)) {
-                            Icon(categoryIcon(normalizeCategory(expense.category)), contentDescription = null, tint = AccentIndigo, modifier = Modifier.padding(9.dp))
+                            Icon(categoryIcon(normalizeCategory(expense.category)), contentDescription = "${normalizeCategory(expense.category)} transaction", tint = AccentIndigo, modifier = Modifier.padding(9.dp))
                         }
                         Column(Modifier.weight(1f)) {
                             Text(expense.title, color = TextPrimary, fontWeight = FontWeight.SemiBold)

@@ -216,7 +216,7 @@ private fun NextClassPanel(next: HomeClassItem?, now: Long, onAddTimetable: () -
         if (next == null) {
             Text("Add your timetable to see your next class here.", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onAddTimetable) { Icon(Icons.Outlined.Add, contentDescription = null); Spacer(Modifier.width(4.dp)); Text("Add Timetable") }
+                Button(onClick = onAddTimetable) { Icon(Icons.Outlined.Add, contentDescription = "Add timetable"); Spacer(Modifier.width(4.dp)); Text("Add Timetable") }
                 OutlinedButton(onClick = onImport) { Text("Import") }
             }
         } else {
