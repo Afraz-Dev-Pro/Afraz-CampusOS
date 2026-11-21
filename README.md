@@ -79,15 +79,17 @@ All app screenshots are grouped in one gallery.
     <td align="center"><img src="assets/screenshots/hackhub-teammates.jpg" alt="Teammate finder" width="160" /><br /><sub>Teammate finder</sub></td>
     <td align="center"><img src="assets/screenshots/hackhub-events.jpg" alt="Hackathons and bounties" width="160" /><br /><sub>Hackathons and bounties</sub></td>
   </tr>
-  <tr>
+</table>
+
+## 🎨 Themes and Customization
+
+<table>
+<tr>
     <td align="center"><img src="assets/screenshots/theme-presets.jpg" alt="Built-in theme presets" width="160" /><br /><sub>Built-in theme presets</sub></td>
     <td align="center"><img src="assets/screenshots/theme-custom-hex.jpg" alt="Custom Hex color editing" width="160" /><br /><sub>Custom Hex color editing</sub></td>
     <td align="center"><img src="assets/screenshots/theme-custom-save.jpg" alt="Save a custom theme" width="160" /><br /><sub>Save a custom theme</sub></td>
   </tr>
 </table>
-
-## 🎨 Themes and Customization
-
 CampusOS includes three built-in palettes that change the app's color system:
 
 - **Midnight Indigo** — dark canvas with indigo accents.
