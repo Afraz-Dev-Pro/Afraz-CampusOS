@@ -71,8 +71,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.rgb(7, 8, 12)),
-            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.rgb(7, 8, 12))
+            statusBarStyle = SystemBarStyle.light(android.graphics.Color.rgb(246, 238, 214), android.graphics.Color.rgb(63, 36, 23)),
+            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.rgb(246, 238, 214), android.graphics.Color.rgb(63, 36, 23))
         )
         openScannerRequest.value = intent.getBooleanExtra(QuickScanTileService.EXTRA_OPEN_SCANNER, false)
         setContent {
@@ -130,26 +130,18 @@ private fun CampusNavScaffold(
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .windowInsetsPadding(WindowInsets.statusBars)
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (isAboutPage) {
+                if (isAboutPage) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .windowInsetsPadding(WindowInsets.statusBars)
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
                         }
-                    }
-                    Text(if (isAboutPage) "About CampusOS" else "CampusOS", fontSize = 16.sp)
-                    Spacer(Modifier.weight(1f))
-                    if (!isAboutPage) {
-                        IconButton(onClick = {
-                            navController.navigate(CampusRoute.About) { launchSingleTop = true }
-                        }) {
-                            Icon(Icons.Outlined.Info, contentDescription = "About CampusOS")
-                        }
+                        Text("About CampusOS", fontSize = 16.sp)
                     }
                 }
             },
@@ -262,3 +254,4 @@ private fun androidx.navigation.NavHostController.navigateTo(route: CampusRoute)
         restoreState = true
     }
 }
+

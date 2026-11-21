@@ -2,15 +2,18 @@ package com.afraz.campusos.feature_dashboard
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -26,7 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,11 +48,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.Dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.afraz.campusos.core.designsystem.AccentIndigo
 import com.afraz.campusos.core.designsystem.GlassCard
@@ -122,71 +131,95 @@ private fun HomeScreenContent(
     onDismissBatteryNotice: () -> Unit,
     onOpenBatterySettings: () -> Unit
 ) {
-    val date = remember(now) { SimpleDateFormat("EEEE · d MMMM", Locale.ENGLISH).format(Date(now)) }
+    val date = remember(now) { SimpleDateFormat("EEEE · d MMMM", Locale.ENGLISH).format(Date(now)).uppercase(Locale.ENGLISH) }
     val hour = remember(now) { java.util.Calendar.getInstance().apply { timeInMillis = now }.get(java.util.Calendar.HOUR_OF_DAY) }
-    val greeting = when (hour) { in 5..11 -> "Good morning, Afraz"; in 12..16 -> "Good afternoon, Afraz"; in 17..21 -> "Good evening, Afraz"; else -> "Good night, Afraz" }
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
-            .padding(horizontal = 18.dp),
-        contentPadding = PaddingValues(top = 12.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(date, color = TextSecondary, fontSize = 13.sp)
-                    Text(greeting, color = TextPrimary, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-                }
-                IconButton(onClick = onOpenProfile, modifier = Modifier.size(48.dp)) {
-                    Icon(Icons.Outlined.Person, contentDescription = "Profile", tint = TextPrimary)
-                }
-            }
-        }
-        item { NextClassPanel(state.nextClass, now, onOpenClasses, onOpenImport) }
-        item { AttendanceHealth(state.aggregateAttendance, state.weakestCourse) }
-        item { TodayTimeline(state.todayClasses, now) }
-        state.urgentTask?.let { task ->
+    val greeting = when (hour) {
+        in 5..11 -> "Good morning, Afraz"
+        in 12..16 -> "Good afternoon, Afraz"
+        in 17..21 -> "Good evening, Afraz"
+        else -> "Good night, Afraz"
+    }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val screenWidth = maxWidth
+        val contentWidth = if (screenWidth >= 700.dp) 760.dp else screenWidth
+        LazyColumn(
+            modifier = Modifier
+                .width(contentWidth)
+                .fillMaxHeight()
+                .align(Alignment.TopCenter)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                .padding(horizontal = if (screenWidth >= 700.dp) 32.dp else 24.dp),
+            contentPadding = PaddingValues(top = 14.dp, bottom = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
             item {
-                Surface(color = SurfaceBento, shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
-                    Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(9.dp).clip(CircleShape).background(StatusWarn))
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text("DUE SOON · ${task.category}", color = StatusWarn, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                            Text(task.title, color = TextPrimary, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text("Today", color = TextPrimary, fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.weight(1f))
+                        IconButton(
+                            onClick = onOpenProfile,
+                            modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer)
+                        ) {
+                            Text("A", color = AccentIndigo, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                         }
-                        NumberText(countdown(task.dueEpochMillis - now), fontSize = 12.sp)
                     }
+                    Text(date, color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Text(greeting, color = TextPrimary, fontSize = 30.sp, lineHeight = 36.sp, fontWeight = FontWeight.Bold)
+                    Text("Here's what your campus day looks like.", color = TextSecondary, fontSize = 14.sp)
                 }
             }
-        }
-        if (state.pinnedActions.isNotEmpty()) {
+            item { NextClassPanel(state.nextClass, now, onOpenClasses, onOpenImport) }
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("QUICK ACTIONS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        state.pinnedActions.take(3).forEach { action ->
-                            OutlinedButton(
-                                onClick = when (action) {
-                                    "Scan Notes" -> onOpenScanner
-                                    "Assignments", "Timetable" -> onOpenClasses
-                                    "Finance" -> onOpenFinance
-                                    else -> onOpenTools
-                                },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                                modifier = Modifier.weight(1f)
-                            ) { Text(action, maxLines = 1, fontSize = 12.sp) }
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Semester at a glance", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    if (screenWidth < 360.dp) {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            AttendanceCard(state.aggregateAttendance, state.weakestCourse, state.trackedCourseCount, Modifier.fillMaxWidth())
+                            AttentionCard(state.weakestCourse, Modifier.fillMaxWidth())
+                        }
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                            AttendanceCard(state.aggregateAttendance, state.weakestCourse, state.trackedCourseCount, Modifier.weight(1.15f))
+                            AttentionCard(state.weakestCourse, Modifier.weight(0.85f))
                         }
                     }
                 }
             }
-        }
-        if (state.batteryRestrictionsActive && !state.batteryNoticeDismissed) {
+            item { TodayTimeline(state.todayClasses, now, onOpenClasses) }
+            state.urgentTask?.let { task -> item { DeadlineCard(task, now) } }
             item {
-                Surface(color = SurfaceBento, shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    if (state.nextClass == null) "YOUR CAMPUS · Add your schedule to see today's classes here."
+                    else "YOUR CAMPUS · Your schedule and attendance stay on this device.",
+                    color = TextSecondary,
+                    fontSize = 11.sp
+                )
+            }
+            if (state.pinnedActions.isNotEmpty()) {
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("QUICK ACTIONS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            state.pinnedActions.take(3).forEach { action ->
+                                OutlinedButton(
+                                    onClick = when (action) {
+                                        "Scan Notes" -> onOpenScanner
+                                        "Assignments", "Timetable" -> onOpenClasses
+                                        "Finance" -> onOpenFinance
+                                        else -> onOpenTools
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) { Text(action, maxLines = 1, fontSize = 12.sp) }
+                            }
+                        }
+                    }
+                }
+            }
+            if (state.batteryRestrictionsActive && !state.batteryNoticeDismissed) {
+                item {
+                    GlassCard {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("Background limits are active", color = StatusWarn, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                             IconButton(onClick = onDismissBatteryNotice, modifier = Modifier.size(48.dp)) {
@@ -203,89 +236,179 @@ private fun HomeScreenContent(
 }
 
 @Composable
-private fun NextClassPanel(next: HomeClassItem?, now: Long, onAddTimetable: () -> Unit, onImport: () -> Unit) {
-    GlassCard {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(9.dp).clip(CircleShape).background(AccentIndigo))
-            Spacer(Modifier.width(8.dp))
-            Text("NEXT CLASS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.weight(1f))
-            if (next != null) NumberText("· ${countdown(next.startsAt - now).uppercase()}", fontSize = 12.sp)
-        }
-        Spacer(Modifier.height(12.dp))
-        if (next == null) {
-            Text("Add your timetable to see your next class here.", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onAddTimetable) { Icon(Icons.Outlined.Add, contentDescription = "Add timetable"); Spacer(Modifier.width(4.dp)); Text("Add Timetable") }
-                OutlinedButton(onClick = onImport) { Text("Import") }
+private fun NextClassPanel(next: HomeClassItem?, now: Long, onOpenClasses: () -> Unit, onImport: () -> Unit) {
+    val cardColor = Color(0xFF4A281B)
+    Surface(color = cardColor, shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(horizontal = 24.dp, vertical = 22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFF16A52)))
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    if (next == null) "NEXT CLASS"
+                    else "NEXT CLASS · STARTS IN ${countdown(next.startsAt - now).uppercase(Locale.ENGLISH)}",
+                    color = Color(0xFFFFE6D4), fontSize = 11.sp, fontWeight = FontWeight.Bold
+                )
             }
-        } else {
-            Text(next.course.name, color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(4.dp))
-            NumberText("${formatTime(next.slot.startMinutes)}–${formatTime(next.slot.endMinutes)}", fontSize = 15.sp)
-            Spacer(Modifier.height(6.dp))
-            Text("Room ${next.course.room.ifBlank { "—" }} · ${next.course.professor.ifBlank { "Professor not set" }}", color = TextSecondary, fontSize = 13.sp)
-        }
-    }
-}
-
-@Composable
-private fun AttendanceHealth(aggregate: Double?, weakest: CourseEntity?) {
-    Surface(color = SurfaceBento, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text("ATTENDANCE HEALTH", color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-            if (aggregate == null || weakest == null) {
-                Text("Attendance starts when you log your first class.", color = TextPrimary, fontWeight = FontWeight.Medium)
-                Text("Your overall status and recovery guidance will appear here.", color = TextSecondary, fontSize = 12.sp)
+            if (next == null) {
+                Text("Your next class will appear here.", color = Color(0xFFFFF4E4), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text("Add a timetable to keep today's plan close.", color = Color(0xFFE6CDBA), fontSize = 14.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(onClick = onOpenClasses, modifier = Modifier.height(48.dp)) { Text("Add timetable") }
+                    OutlinedButton(onClick = onImport, modifier = Modifier.height(48.dp)) { Text("Import") }
+                }
             } else {
-                val weakestRatio = weakest.attendedClasses.toDouble() / weakest.totalClasses
-                val color = when { aggregate >= 75.0 -> StatusSafe; aggregate >= 70.0 -> StatusWarn; else -> StatusDanger }
-                val cue = if (weakestRatio >= weakest.targetPercentage) {
-                    "${weakest.code} is on track for its ${(weakest.targetPercentage * 100).toInt()}% target."
-                } else {
-                    val classes = ceil((weakest.targetPercentage * weakest.totalClasses - weakest.attendedClasses) / (1.0 - weakest.targetPercentage)).toInt().coerceAtLeast(1)
-                    "Attend next $classes classes to reach ${(weakest.targetPercentage * 100).toInt()}%."
+                Text(next.course.name, color = Color(0xFFFFF8EC), fontSize = 24.sp, lineHeight = 30.sp, fontWeight = FontWeight.Bold)
+                Text("${next.course.code} · ${next.course.professor.ifBlank { "Professor not set" }}", color = Color(0xFFE5CDBB), fontSize = 14.sp)
+                Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0x40FFF3E4)))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    NumberText("${formatTime(next.slot.startMinutes)} – ${formatTime(next.slot.endMinutes)}", fontSize = 17.sp, color = Color(0xFFFFF4E4))
+                    Spacer(Modifier.weight(1f))
+                    Surface(color = Color(0xFFC8372A), shape = RoundedCornerShape(50.dp)) {
+                        Text("Room ${next.course.room.ifBlank { "—" }}", color = Color(0xFFFFF7EA), fontSize = 13.sp, modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp))
+                    }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    NumberText("${"%.1f".format(Locale.ENGLISH, aggregate)}%", fontSize = 22.sp)
-                    Spacer(Modifier.width(10.dp))
-                    Text(when { aggregate >= 75.0 -> "On track"; aggregate >= 70.0 -> "Attention"; else -> "Needs recovery" }, color = color, fontWeight = FontWeight.Bold)
-                }
-                Text("Lowest: ${weakest.name} · ${weakest.attendedClasses}/${weakest.totalClasses}", color = color, fontSize = 13.sp)
-                Text(cue, color = TextSecondary, fontSize = 12.sp)
+                TextButtonLike("Open today's schedule  ›", onOpenClasses)
             }
         }
     }
 }
 
 @Composable
-private fun TodayTimeline(classes: List<HomeClassItem>, now: Long) {
-    Column {
-        Text("TODAY", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+private fun TextButtonLike(label: String, onClick: () -> Unit) {
+    androidx.compose.material3.TextButton(onClick = onClick, contentPadding = PaddingValues(0.dp)) {
+        Text(label, color = Color(0xFFE8D0BE), fontSize = 12.sp)
+    }
+}
+
+@Composable
+private fun AttendanceCard(aggregate: Double?, weakest: CourseEntity?, trackedCount: Int, modifier: Modifier = Modifier) {
+    OutlinedWarmCard(modifier) {
+        Text("ATTENDANCE", color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            AttendanceRing(aggregate, 72.dp)
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text("Overall", color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(if (weakest == null) "No subjects tracked" else "$trackedCount subjects tracked", color = TextSecondary, fontSize = 11.sp, lineHeight = 14.sp)
+            }
+        }
+        Spacer(Modifier.height(7.dp))
+        Text(
+            if (aggregate == null) "Log a class to start tracking."
+            else if (aggregate >= 75.0) "On track for your 75% goal"
+            else "Your attendance needs a little attention",
+            color = if (aggregate == null || aggregate >= 75.0) TextSecondary else StatusDanger,
+            fontSize = 11.sp,
+            lineHeight = 14.sp
+        )
+    }
+}
+
+@Composable
+private fun AttentionCard(weakest: CourseEntity?, modifier: Modifier = Modifier) {
+    OutlinedWarmCard(modifier) {
+        Text(if (weakest == null) "ATTENDANCE" else "NEEDS ATTENTION", color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        if (weakest == null || weakest.totalClasses == 0) {
+            Text("No subject data yet", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            Spacer(Modifier.height(6.dp))
+            Text("Mark attendance in Classes to see your recovery plan.", color = TextSecondary, fontSize = 11.sp, lineHeight = 15.sp)
+        } else {
+            val ratio = weakest.attendedClasses.toDouble() / weakest.totalClasses
+            val percent = ratio * 100.0
+            val mustAttend = ceil((weakest.targetPercentage * weakest.totalClasses - weakest.attendedClasses) / (1.0 - weakest.targetPercentage)).toInt().coerceAtLeast(0)
+            val statusColor = if (percent >= weakest.targetPercentage * 100) StatusSafe else StatusDanger
+            Text(weakest.name, color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, maxLines = 2, lineHeight = 18.sp)
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                NumberText("${percent.toInt()}%", fontSize = 22.sp, color = statusColor)
+                Text(
+                    if (percent < weakest.targetPercentage * 100) "Attend next $mustAttend classes to reach ${(weakest.targetPercentage * 100).toInt()}%"
+                    else "On track for your ${(weakest.targetPercentage * 100).toInt()}% goal",
+                    color = TextSecondary, fontSize = 10.sp, lineHeight = 13.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OutlinedWarmCard(modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
+    Surface(
+        color = Color(0xFFF8F0DA),
+        shape = RoundedCornerShape(20.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF846B4E)),
+        modifier = modifier
+    ) {
+        Column(Modifier.padding(16.dp), content = content)
+    }
+}
+
+@Composable
+private fun AttendanceRing(aggregate: Double?, size: Dp) {
+    val progress = (aggregate ?: 0.0).toFloat().div(100f).coerceIn(0f, 1f)
+    Box(Modifier.size(size), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.fillMaxSize()) {
+            val stroke = 7.dp.toPx()
+            val inset = stroke / 2
+            drawArc(Color(0xFFE7D6B8), -90f, 360f, false, topLeft = Offset(inset, inset), size = Size(this.size.width - stroke, this.size.height - stroke), style = Stroke(stroke, cap = StrokeCap.Round))
+            if (aggregate != null) drawArc(Color(0xFFB63429), -90f, 360f * progress, false, topLeft = Offset(inset, inset), size = Size(this.size.width - stroke, this.size.height - stroke), style = Stroke(stroke, cap = StrokeCap.Round))
+        }
+        Text(if (aggregate == null) "—" else "${aggregate.toInt()}%", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun TodayTimeline(classes: List<HomeClassItem>, now: Long, onOpenClasses: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Today", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.weight(1f))
+            androidx.compose.material3.TextButton(onClick = onOpenClasses, contentPadding = PaddingValues(0.dp)) {
+                Text("FULL SCHEDULE  ›", color = AccentIndigo, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
+        }
         if (classes.isEmpty()) {
-            Text("No more classes scheduled for today.", color = TextSecondary, fontSize = 14.sp)
+            Text("No more classes scheduled for today.", color = TextSecondary, fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
         } else {
             Row(Modifier.fillMaxWidth()) {
-                Column(Modifier.width(22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(10.dp).clip(CircleShape).background(AccentIndigo))
-                    Box(Modifier.width(2.dp).height((classes.size * 100).dp).background(AccentIndigo.copy(alpha = 0.55f)))
+                Column(Modifier.width(28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.size(18.dp).clip(CircleShape).background(Color(0xFFF6EED6)).padding(4.dp).clip(CircleShape).background(StatusDanger))
+                    Box(Modifier.width(3.dp).height((classes.size * 92).dp).background(StatusDanger.copy(alpha = 0.9f)))
                 }
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("NOW", color = AccentIndigo, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    classes.forEachIndexed { index, item ->
-                        Surface(color = SurfaceBento, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth()) {
-                            Row(Modifier.padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Column(Modifier.weight(1f)) {
-                                    NumberText("${formatEpochTime(item.startsAt)}–${formatEpochTime(item.endsAt)}", fontSize = 12.sp)
-                                    Text(item.course.name, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                                    Text("${item.course.code} · ${item.course.room}", color = TextSecondary, fontSize = 12.sp)
-                                }
-                                if (index == 0 && item.startsAt <= now) Text("NEXT", color = AccentIndigo, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                            }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    val first = classes.first()
+                    val ongoing = first.startsAt <= now && first.endsAt > now
+                    Text(if (ongoing) "NOW · class in progress" else "NOW · between classes", color = StatusDanger, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text(if (ongoing) "Ends at ${formatEpochTime(first.endsAt)}" else "Next up in ${countdown(first.startsAt - now).lowercase(Locale.ENGLISH)}", color = TextSecondary, fontSize = 12.sp)
+                    classes.forEach { item ->
+                        Column(Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
+                            Text(item.course.name, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                            Text("${formatEpochTime(item.startsAt)} · Room ${item.course.room.ifBlank { "—" }}", color = TextSecondary, fontSize = 13.sp)
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun DeadlineCard(task: TaskEntity, now: Long) {
+    Surface(
+        color = Color(0xFFF8F0DA),
+        shape = RoundedCornerShape(20.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF846B4E)),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(Modifier.padding(horizontal = 18.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(12.dp).clip(CircleShape).background(StatusDanger))
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text(task.title, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                Text("${task.category.replaceFirstChar { it.titlecase(Locale.ENGLISH) }} due ${if (task.dueEpochMillis - now < 24 * 60 * 60_000L) "today" else "tomorrow"}", color = TextSecondary, fontSize = 12.sp)
+            }
+            Text(countdown(task.dueEpochMillis - now), color = TextPrimary, fontSize = 12.sp)
         }
     }
 }
@@ -301,20 +424,20 @@ private fun countdown(milliseconds: Long): String {
     return when { days > 0 -> "${days}d ${hours}h"; hours > 0 -> "${hours}h ${remaining}m"; else -> "$minutes MIN" }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF07080C)
+@Preview(showBackground = true, backgroundColor = 0xFFF6EED6)
 @Composable
 private fun HomeStatePreviewToggles() {
     var populated by remember { mutableStateOf(true) }
     val now = remember { System.currentTimeMillis() }
-    val sampleCourse = CourseEntity("preview", "Data Structures", "CS204", "Dr. Rao", "B-204", 14, 18, 0.75, 4)
+    val sampleCourse = CourseEntity("preview", "Data Structures", "CSE 204", "Prof. N. Sharma", "B-204", 14, 18, 0.75, 4)
     val sampleSlot = ScheduleSlotEntity("preview-slot", sampleCourse.id, java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK).let { if (it == 1) 7 else it - 1 }, 600, 650)
     val sampleState = if (populated) HomeState(
         nextClass = HomeClassItem(sampleCourse, sampleSlot, now + 18 * 60_000L, now + 68 * 60_000L),
         todayClasses = listOf(HomeClassItem(sampleCourse, sampleSlot, now + 18 * 60_000L, now + 68 * 60_000L)),
-        aggregateAttendance = 77.8,
-        weakestCourse = sampleCourse,
-        urgentTask = TaskEntity("preview-task", sampleCourse.id, "Submit lab report", "ASSIGNMENT", now + 6 * 60 * 60_000L, 1, false),
-        batteryRestrictionsActive = true
+        aggregateAttendance = 78.0,
+        trackedCourseCount = 4,
+        weakestCourse = sampleCourse.copy(name = "Physics", attendedClasses = 10, totalClasses = 14),
+        urgentTask = TaskEntity("preview-task", sampleCourse.id, "Lab report due tomorrow", "ASSIGNMENT", now + 6 * 60 * 60_000L, 1, false)
     ) else HomeState(pinnedActions = emptyList())
     CampusOsTheme {
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -326,3 +449,4 @@ private fun HomeStatePreviewToggles() {
         }
     }
 }
+

@@ -32,6 +32,7 @@ data class HomeState(
     val todayClasses: List<HomeClassItem> = emptyList(),
     val aggregateAttendance: Double? = null,
     val weakestCourse: CourseEntity? = null,
+    val trackedCourseCount: Int = 0,
     val urgentTask: TaskEntity? = null,
     val pinnedActions: List<String> = DEFAULT_PINNED,
     val batteryRestrictionsActive: Boolean = false,
@@ -83,6 +84,7 @@ class HomeViewModel @Inject constructor(
             todayClasses = todayItems,
             aggregateAttendance = if (total == 0) null else attended * 100.0 / total,
             weakestCourse = logged.minByOrNull { it.attendedClasses.toDouble() / it.totalClasses },
+            trackedCourseCount = logged.size,
             urgentTask = urgent,
             pinnedActions = catalog.filter { it in selected }.take(3),
             batteryRestrictionsActive = OemBatteryHelper.shouldShow(context),
@@ -110,3 +112,4 @@ class HomeViewModel @Inject constructor(
         set(Calendar.MILLISECOND, 0)
     }.timeInMillis
 }
+
