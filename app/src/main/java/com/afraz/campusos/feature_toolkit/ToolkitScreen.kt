@@ -1,5 +1,6 @@
 package com.afraz.campusos.feature_toolkit
 
+import com.afraz.campusos.ui.theme.LocalCampusColors
 import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -7,7 +8,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -26,11 +26,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -63,10 +63,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.afraz.campusos.core.designsystem.GlassCard
-import com.afraz.campusos.core.designsystem.TextPrimary
-import com.afraz.campusos.core.designsystem.TextSecondary
-import com.afraz.campusos.core.util.ExpenseMath
-import com.afraz.campusos.core.util.UpiDeepLinkHelper
 import com.afraz.campusos.data.WalletDocEntity
 import com.afraz.campusos.feature_toolkit.focus.PomodoroForegroundService
 import com.afraz.campusos.feature_toolkit.focus.PomodoroForegroundService.Companion.ACTION_PAUSE
@@ -80,13 +76,11 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.text.DateFormat
-import java.util.Calendar
 import kotlin.math.max
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = false, onAutoStartConsumed: () -> Unit = {}, financeOnly: Boolean = false, walletOnly: Boolean = false, viewModel: ToolkitViewModel = hiltViewModel()) {
+fun ToolsScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = false, onAutoStartConsumed: () -> Unit = {}, walletOnly: Boolean = false, viewModel: ToolkitViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsState()
     val haptics = LocalHapticFeedback.current
@@ -109,6 +103,18 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
     var selectedFriends by remember { mutableStateOf(setOf<String>()) }
     var capturedPhotos by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    var focusSeconds by remember { mutableStateOf(25 * 60) }
+    var focusActive by remember { mutableStateOf(false) }
+    var focusPaused by remember { mutableStateOf(false) }
+    val backupPicker = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri -> uri?.let(viewModel::exportBackup) }
+    val restorePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(viewModel::restoreBackup) }
+    LaunchedEffect(focusActive, focusPaused) {
+        while (focusActive && !focusPaused && focusSeconds > 0) {
+            kotlinx.coroutines.delay(1_000)
+            focusSeconds -= 1
+        }
+        if (focusSeconds == 0) focusActive = false
+    }
     val postNotificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) PomodoroForegroundService.sendAction(context, ACTION_START)
     }
@@ -167,20 +173,21 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
     LazyColumn(modifier.fillMaxSize().padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Spacer(Modifier.height(16.dp))
-            Text(if (financeOnly) "Finance" else if (walletOnly) "Digital ID" else "Toolkit", color = TextPrimary, fontSize = 29.sp, fontWeight = FontWeight.Bold)
-            Text(if (financeOnly) "Personal spending, UPI and bill splits." else if (walletOnly) "Your campus documents, ready when you need them." else "Campus helpers that work offline.", color = TextSecondary)
+            Text(if (walletOnly) "Digital ID" else "Tools", color = LocalCampusColors.current.textPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text(if (walletOnly) "Your campus documents, ready when you need them." else "Campus helpers that work offline.", color = LocalCampusColors.current.textSecondary)
         }
-        if (!financeOnly && !walletOnly) item {
+        if (!walletOnly) item { Text("STUDY", color = LocalCampusColors.current.textSecondary, fontWeight = FontWeight.Bold) }
+        if (!walletOnly) item {
             GlassCard {
-                Text("DOCUMENT SCANNER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Google Play services scans pages without a camera permission.", color = TextPrimary)
+                Text("DOCUMENT SCANNER", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Google Play services scans pages without a camera permission.", color = LocalCampusColors.current.textPrimary)
                 Button(onClick = launchScanner) { Text("Scan notes") }
-                if (scanMessage.isNotBlank()) Text(scanMessage, color = TextSecondary)
+                if (scanMessage.isNotBlank()) Text(scanMessage, color = LocalCampusColors.current.textSecondary)
             }
         }
-        if (!financeOnly && !walletOnly) item {
+        if (!walletOnly) item {
             GlassCard {
-                Text("NATIVE PDF MAKER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("NATIVE PDF MAKER", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(pdfTitle, { pdfTitle = it }, label = { Text("PDF title") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(noteText, { noteText = it }, label = { Text("Notes · separate pages with ---PAGE---") }, modifier = Modifier.fillMaxWidth(), minLines = 4)
                 Button(onClick = { viewModel.createNotesPdf(pdfTitle.ifBlank { "Notes" }, noteText); pdfTitle = ""; noteText = "" }, enabled = noteText.isNotBlank()) { Text("Create A4 PDF from notes") }
@@ -188,7 +195,7 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                 Button(onClick = { imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) { Text("Choose images and create PDF") }
                 Button(onClick = takePhoto) { Text("Take photo for PDF") }
                 if (capturedPhotos.isNotEmpty()) {
-                    Text("${capturedPhotos.size} photo(s) captured. Take more pages or create the PDF.", color = TextSecondary)
+                    Text("${capturedPhotos.size} photo(s) captured. Take more pages or create the PDF.", color = LocalCampusColors.current.textSecondary)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = { viewModel.createImagePdf(imagePdfTitle.ifBlank { "Scanned pages" }, capturedPhotos); capturedPhotos = emptyList() }) { Text("Create PDF from photos") }
                         Button(onClick = { capturedPhotos = emptyList() }) { Text("Clear photos") }
@@ -197,138 +204,43 @@ fun ToolkitScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = fal
                 Button(onClick = { documentPicker.launch(arrayOf("application/pdf", "image/*")) }) { Text("Import PDF or ID document") }
             }
         }
-        if (financeOnly) item {
-            val monthStart = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
-            val spent = state.expenses.filter { it.timestamp >= monthStart }.sumOf { it.amountPaise }
+        if (!walletOnly) item {
             GlassCard {
-                Text("PERSONAL SPEND", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("₹${"%.2f".format(spent / 100.0)} spent this month · ₹${"%.2f".format(state.monthlyBudgetPaise / 100.0)} budget", color = TextPrimary)
-                androidx.compose.material3.LinearProgressIndicator(progress = { if (state.monthlyBudgetPaise == 0L) 1f else (spent.toFloat() / state.monthlyBudgetPaise).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(expenseTitle, { expenseTitle = it }, label = { Text("Item") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(expenseAmount, { expenseAmount = it }, label = { Text("₹ amount") }, modifier = Modifier.weight(1f))
-                }
-                OutlinedTextField(expenseCategory, { expenseCategory = it }, label = { Text("Category") }, modifier = Modifier.fillMaxWidth())
-                Button(onClick = { viewModel.addExpense(expenseTitle, expenseCategory, expenseAmount); expenseTitle = ""; expenseAmount = "" }, enabled = expenseTitle.isNotBlank() && expenseAmount.isNotBlank()) { Text("Add expense") }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(budget, { budget = it }, label = { Text("Monthly budget ₹") }, modifier = Modifier.weight(1f))
-                    Button(onClick = { viewModel.setMonthlyBudget(budget); budget = "" }) { Text("Set") }
-                }
-                state.expenses.take(5).forEach { expense ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text("${expense.title} · ${expense.category}", color = TextPrimary, modifier = Modifier.weight(1f), maxLines = 1)
-                        Text("₹${"%.2f".format(expense.amountPaise / 100.0)}", color = TextSecondary)
-                        IconButton(onClick = { viewModel.deleteExpense(expense.id) }, modifier = Modifier.height(36.dp)) {
-                            Icon(Icons.Default.Close, contentDescription = "Remove ${expense.title}", tint = TextSecondary)
-                        }
-                    }
+                Text("POMODORO FOCUS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(if (focusActive) if (focusPaused) "Focus paused" else "Focus session active" else "Ready for a focus block", color = LocalCampusColors.current.textPrimary)
+                Text("%02d:%02d".format(focusSeconds / 60, focusSeconds % 60), color = LocalCampusColors.current.textPrimary, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                Text("Controls also stay in your notification shade.", color = LocalCampusColors.current.textSecondary)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); focusSeconds = 25 * 60; focusActive = true; focusPaused = false; startFocus() }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Start") }
+                    Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); if (!focusActive) focusActive = true; focusPaused = !focusPaused; PomodoroForegroundService.sendAction(context, ACTION_PAUSE) }, modifier = Modifier.heightIn(min = 48.dp)) { Text(if (focusPaused) "Resume" else "Pause") }
+                    Button(onClick = { PomodoroForegroundService.sendAction(context, ACTION_SKIP); focusSeconds = 25 * 60; focusActive = false; focusPaused = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Skip") }
+                    Button(onClick = { PomodoroForegroundService.sendAction(context, ACTION_STOP); focusActive = false; focusPaused = false; focusSeconds = 25 * 60 }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Stop") }
                 }
             }
         }
-        if (financeOnly) item {
+        if (!walletOnly) item { Text("CAMPUS", color = LocalCampusColors.current.textSecondary, fontWeight = FontWeight.Bold) }
+        if (!walletOnly) item {
             GlassCard {
-                Text("SPLIT BY PEOPLE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Divide any bill evenly without saving contacts or UPI IDs.", color = TextSecondary, fontSize = 12.sp)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(peopleSplitAmount, { peopleSplitAmount = it; calculatedPeopleShares = null }, label = { Text("Total ₹") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(peopleCount, { peopleCount = it.filter(Char::isDigit).take(3); calculatedPeopleShares = null }, label = { Text("People") }, modifier = Modifier.weight(1f))
-                }
-                val splitTotalPaise = runCatching { ExpenseMath.rupeesToPaise(peopleSplitAmount) }.getOrNull()
-                val count = peopleCount.toIntOrNull()
-                Button(
-                    onClick = { calculatedPeopleShares = runCatching { ExpenseMath.splitPaise(splitTotalPaise!!, count!!) }.getOrNull() },
-                    enabled = splitTotalPaise != null && splitTotalPaise > 0L && count != null && count in 1..100
-                ) { Text("Calculate share") }
-                calculatedPeopleShares?.let { shares ->
-                    val distribution = shares.groupingBy { it }.eachCount().entries
-                        .sortedBy { it.key }
-                        .joinToString(" · ") { (paise, people) -> "₹${"%.2f".format(paise / 100.0)} × $people" }
-                    Text(if (shares.distinct().size == 1) "₹${"%.2f".format(shares.first() / 100.0)} each · ${shares.size} people" else "Per-person shares: $distribution", color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                    if (shares.distinct().size > 1) Text("Extra paise are distributed so the shares add up to the exact total.", color = TextSecondary, fontSize = 12.sp)
-                }
-            }
-        }
-        if (financeOnly) item {
-            GlassCard {
-                Text("FRIENDS & BILL SPLITTER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(friendName, { friendName = it }, label = { Text("Name") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(friendUpi, { friendUpi = it }, label = { Text("UPI ID") }, modifier = Modifier.weight(1f))
-                }
-                Button(onClick = { viewModel.saveFriend(friendName, friendUpi); friendName = ""; friendUpi = "" }, enabled = friendName.isNotBlank() && friendUpi.contains('@')) { Text("Save friend") }
-                if (friendName.isNotBlank() && !friendUpi.contains('@')) {
-                    Text("Add a UPI ID (for example, name@bank) to enable Save friend.", color = TextSecondary, fontSize = 12.sp)
-                }
-                state.friends.forEach { friend ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(friend.id in selectedFriends, onCheckedChange = { checked -> selectedFriends = if (checked) selectedFriends + friend.id else selectedFriends - friend.id })
-                        Text("${friend.name} · ${friend.upiId}", color = TextPrimary)
-                    }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(groupTitle, { groupTitle = it }, label = { Text("Bill note") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(groupAmount, { groupAmount = it }, label = { Text("Total ₹") }, modifier = Modifier.weight(1f))
-                }
-                val validSplitTotal = groupAmount.trim().toBigDecimalOrNull()?.let { it > java.math.BigDecimal.ZERO } == true
-                when {
-                    state.friends.isEmpty() -> Text("To split a bill, first save a friend with a valid UPI ID above.", color = TextSecondary, fontSize = 12.sp)
-                    selectedFriends.isEmpty() -> Text("Select at least one saved friend. The total will be divided evenly between you and the selected friends.", color = TextSecondary, fontSize = 12.sp)
-                    !validSplitTotal && groupAmount.isNotBlank() -> Text("Enter a total greater than ₹0.", color = TextSecondary, fontSize = 12.sp)
-                    selectedFriends.isNotEmpty() -> Text("Splitting the total across you and ${selectedFriends.size} selected friend(s).", color = TextSecondary, fontSize = 12.sp)
-                }
-                Button(onClick = { viewModel.createEqualSplit(groupTitle, groupAmount, selectedFriends.toList()); groupTitle = ""; groupAmount = "" }, enabled = groupTitle.isNotBlank() && validSplitTotal && selectedFriends.isNotEmpty()) { Text("Split equally") }
-                Text("Custom split: enter one ₹ share per selected friend, in the list order. Any remainder stays with you.", color = TextSecondary, fontSize = 12.sp)
-                OutlinedTextField(customShares, { customShares = it }, label = { Text("Custom friend shares, comma separated") }, modifier = Modifier.fillMaxWidth())
-                Button(onClick = {
-                    val ordered = state.friends.filter { it.id in selectedFriends }.map { it.id }
-                    viewModel.createCustomSplit(groupTitle, groupAmount, ordered, customShares.split(',').map(String::trim))
-                    groupTitle = ""; groupAmount = ""; customShares = ""
-                }, enabled = groupTitle.isNotBlank() && groupAmount.isNotBlank() && selectedFriends.isNotEmpty() && customShares.isNotBlank()) { Text("Save custom split") }
-                state.groups.forEach { group ->
-                    Text("${group.title} · ₹${"%.2f".format(group.totalAmountPaise / 100.0)}", color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                    state.splits.filter { it.groupId == group.id }.forEach { split ->
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f)) {
-                                Text("${split.friendName} · ₹${"%.2f".format(split.shareAmountPaise / 100.0)}", color = TextPrimary)
-                                Text(if (split.isSettled) "Settled" else "Unsettled", color = TextSecondary, fontSize = 12.sp)
-                            }
-                            if (!split.isSettled) {
-                                Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); UpiDeepLinkHelper.settle(context, split.friendUpiId, split.friendName, group.title, split.shareAmountPaise) }) { Text("Settle Up") }
-                                Button(onClick = { viewModel.setSettled(split.id, true) }) { Text("Paid") }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (!financeOnly) item {
-            GlassCard {
-                Text("DIGITAL ID & DOCUMENT WALLET", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Button(onClick = { documentPicker.launch(arrayOf("image/*", "application/pdf")) }) { Text("Add ID, pass or hall ticket") }
+                Text("DIGITAL ID & CAMPUS PASSES", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Button(onClick = { documentPicker.launch(arrayOf("image/*", "application/pdf")) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Add ID or pass") }
                 state.documents.forEach { doc ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text(doc.title, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                            Text("${doc.docType} · ${doc.subjectFolder ?: "Campus"}", color = TextSecondary, fontSize = 12.sp)
+                            Text(doc.title, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                            Text("${doc.docType} · ${doc.subjectFolder ?: "Campus"}", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                         }
-                        Button(onClick = {
-                            if (doc.mimeType.startsWith("image/")) viewingDoc = doc else openPdf(context, doc.localFilePath)
-                        }) { Text("Open") }
-                        Button(onClick = { viewModel.deleteDocument(doc.id) }) { Text("Remove") }
+                        Button(onClick = { if (doc.mimeType.startsWith("image/")) viewingDoc = doc else openPdf(context, doc.localFilePath) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Open") }
                     }
                 }
             }
         }
-        if (!financeOnly && !walletOnly) item {
+        if (!walletOnly) item { Text("DATA", color = LocalCampusColors.current.textSecondary, fontWeight = FontWeight.Bold) }
+        if (!walletOnly) item {
             GlassCard {
-                Text("POMODORO FOCUS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Start a 25 minute focus block. Controls stay in your notification shade.", color = TextPrimary)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); startFocus() }) { Text("Start") }
-                    Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); PomodoroForegroundService.sendAction(context, ACTION_PAUSE) }) { Text("Pause / resume") }
-                    Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); PomodoroForegroundService.sendAction(context, ACTION_SKIP) }) { Text("Skip") }
-                    Button(onClick = { PomodoroForegroundService.sendAction(context, ACTION_STOP) }) { Text("Stop") }
-                }
+                Text("LOCAL BACKUP", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Export or restore your local campus data as JSON using the Android file picker.", color = LocalCampusColors.current.textPrimary)
+                Button(onClick = { backupPicker.launch("campusos_backup_v1.json") }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Export JSON") }
+                Button(onClick = { restorePicker.launch(arrayOf("application/json", "application/gzip", "application/octet-stream")) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Restore JSON") }
             }
         }
         item { Spacer(Modifier.height(16.dp)) }
@@ -388,3 +300,4 @@ private fun openPdf(context: Context, path: String) {
         Toast.makeText(context, "No PDF viewer is installed", Toast.LENGTH_LONG).show()
     }
 }
+

@@ -17,6 +17,7 @@ import com.afraz.campusos.data.ExpenseSplitEntity
 import com.afraz.campusos.data.FriendContactEntity
 import com.afraz.campusos.data.PersonalExpenseEntity
 import com.afraz.campusos.data.WalletDocEntity
+import com.afraz.campusos.data.JsonBackupManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -44,8 +45,11 @@ data class ToolkitState(
 class ToolkitViewModel @Inject constructor(
     private val database: AppDatabase,
     private val settings: DataStore<Preferences>,
+    private val backupManager: JsonBackupManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
+    fun exportBackup(uri: Uri) = viewModelScope.launch { runCatching { backupManager.writeToUri(uri, compressed = false) } }
+    fun restoreBackup(uri: Uri) = viewModelScope.launch { runCatching { backupManager.restoreFromUri(uri) } }
     private val budgetKey = longPreferencesKey("monthly_budget_paise")
     private val budgetFlow = settings.data.map { it[budgetKey] ?: 500_000L }
     private val mainData = combine(
@@ -135,3 +139,4 @@ class ToolkitViewModel @Inject constructor(
         database.walletDocDao().delete(id)
     }
 }
+

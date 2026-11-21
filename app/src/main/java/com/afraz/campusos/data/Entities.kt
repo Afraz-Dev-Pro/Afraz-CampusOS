@@ -44,8 +44,17 @@ data class ExpenseGroupEntity(@PrimaryKey val id: String, val title: String, val
 
 @Serializable
 @Entity(foreignKeys = [ForeignKey(entity = ExpenseGroupEntity::class, parentColumns = ["id"], childColumns = ["groupId"], onDelete = ForeignKey.CASCADE)], indices = [Index("groupId")])
-data class ExpenseSplitEntity(@PrimaryKey val id: String, val groupId: String, val friendName: String, val friendUpiId: String, val shareAmountPaise: Long, val isSettled: Boolean)
+data class ExpenseSplitEntity(
+    @PrimaryKey val id: String,
+    val groupId: String,
+    val friendName: String,
+    val friendUpiId: String,
+    val shareAmountPaise: Long,
+    val isSettled: Boolean,
+    @androidx.room.ColumnInfo(defaultValue = "'YOU_OWE'") val direction: String = "YOU_OWE"
+)
 
 @Serializable
 @Entity
 data class WalletDocEntity(@PrimaryKey val id: String, val title: String, val docType: String, val subjectFolder: String?, val localFilePath: String, val mimeType: String, val createdAt: Long)
+

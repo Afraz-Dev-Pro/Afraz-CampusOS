@@ -1,5 +1,6 @@
 package com.afraz.campusos.feature_dashboard
 
+import com.afraz.campusos.ui.theme.LocalCampusColors
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -37,11 +38,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.afraz.campusos.core.designsystem.GlassCard
 import com.afraz.campusos.core.designsystem.NumberText
-import com.afraz.campusos.core.designsystem.StatusDanger
-import com.afraz.campusos.core.designsystem.StatusSafe
-import com.afraz.campusos.core.designsystem.StatusWarn
-import com.afraz.campusos.core.designsystem.TextPrimary
-import com.afraz.campusos.core.designsystem.TextSecondary
 import com.afraz.campusos.core.util.OemBatteryHelper
 import java.util.Date
 
@@ -69,12 +65,12 @@ fun DashboardScreen(
     LazyColumn(modifier.padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Spacer(Modifier.height(16.dp))
-            Text("CAMPUSOS / STUDENT SPACE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            Text("Your campus, in one place", color = TextPrimary, fontSize = 27.sp, fontWeight = FontWeight.Bold)
+            Text("CAMPUSOS / STUDENT SPACE", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text("Home", color = LocalCampusColors.current.textPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         }
         item {
             GlassCard {
-                Text("CAMPUS SHORTCUTS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("CAMPUS SHORTCUTS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = onOpenDigitalId, modifier = Modifier.weight(1f)) { Text("Digital ID") }
                     Button(onClick = onOpenFinance, modifier = Modifier.weight(1f)) { Text("Finance") }
@@ -83,17 +79,17 @@ fun DashboardScreen(
         }
         item {
             GlassCard {
-                Text("UP NEXT", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("UP NEXT", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 val next = state.nextClass
                 if (next == null) {
-                    Text("No upcoming class", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
-                    Text("Add courses and timetable slots in Academics.", color = TextSecondary)
+                    Text("No upcoming class", color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
+                    Text("Add courses and timetable slots in Academics.", color = LocalCampusColors.current.textSecondary)
                     Button(onClick = onOpenAcademics) { Text("Open timetable") }
                 } else {
-                    Text(next.course.name, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                    Text("${next.course.code} · Room ${next.course.room.ifBlank { "—" }}", color = TextSecondary)
+                    Text(next.course.name, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    Text("${next.course.code} · Room ${next.course.room.ifBlank { "—" }}", color = LocalCampusColors.current.textSecondary)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(Date(next.startsAt).toString(), color = TextSecondary)
+                        Text(Date(next.startsAt).toString(), color = LocalCampusColors.current.textSecondary)
                         NumberText(countdown(next.startsAt - now), fontSize = 16.sp)
                     }
                 }
@@ -101,7 +97,7 @@ fun DashboardScreen(
         }
         state.timetableAssetPath?.let { path -> item {
             GlassCard {
-                Text("MY TIMETABLE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("MY TIMETABLE", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 if (state.timetableAssetMime?.startsWith("image/") == true) {
                     AsyncImage(model = java.io.File(path), contentDescription = "Saved timetable", modifier = Modifier.fillMaxWidth().height(210.dp))
                 } else {
@@ -115,21 +111,21 @@ fun DashboardScreen(
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 GlassCard(Modifier.weight(1f)) {
-                    Text("ATTENDANCE", color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text("ATTENDANCE", color = LocalCampusColors.current.textSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     if (state.aggregateAttendance == null) {
-                        Text("No data", color = TextPrimary, fontWeight = FontWeight.Bold)
-                        Text("Log classes to see your aggregate.", color = TextSecondary, fontSize = 12.sp)
+                        Text("No data", color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.Bold)
+                        Text("Log classes to see your aggregate.", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                     } else {
                         val percentage = state.aggregateAttendance!!.toFloat() / 100f
-                        val tint = when { percentage >= 0.75f -> StatusSafe; percentage >= 0.70f -> StatusWarn; else -> StatusDanger }
+                        val tint = when { percentage >= 0.75f -> LocalCampusColors.current.statusSafe; percentage >= 0.70f -> LocalCampusColors.current.statusWarning; else -> LocalCampusColors.current.statusDanger }
                         CircularProgressIndicator(progress = { percentage.coerceIn(0f, 1f) }, color = tint)
                         NumberText("${"%.1f".format(state.aggregateAttendance)}%", fontSize = 19.sp)
-                        state.lowestAttendance?.let { Text("Watch ${it.code}: ${it.attendedClasses}/${it.totalClasses}", color = StatusWarn, fontSize = 11.sp) }
+                        state.lowestAttendance?.let { Text("Watch ${it.code}: ${it.attendedClasses}/${it.totalClasses}", color = LocalCampusColors.current.statusWarning, fontSize = 11.sp) }
                     }
                 }
                 GlassCard(Modifier.weight(1f)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("QUICK TOOLS", color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text("QUICK TOOLS", color = LocalCampusColors.current.textSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         Button(onClick = { showToolPicker = true }) { Text("Edit") }
                     }
                     state.pinnedTools.forEach { tool ->
@@ -141,22 +137,22 @@ fun DashboardScreen(
                             else -> onOpenToolkit
                         }, modifier = Modifier.fillMaxWidth()) { Text(tool) }
                     }
-                    Text("${state.pinnedTools.size}/3 pinned", color = TextSecondary, fontSize = 11.sp)
+                    Text("${state.pinnedTools.size}/3 pinned", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp)
                 }
             }
         }
         item {
             GlassCard {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("URGENT · NEXT 48H", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text("${state.tasks.size}", color = if (state.tasks.isEmpty()) StatusSafe else StatusWarn)
+                    Text("URGENT · NEXT 48H", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("${state.tasks.size}", color = if (state.tasks.isEmpty()) LocalCampusColors.current.statusSafe else LocalCampusColors.current.statusWarning)
                 }
-                if (state.tasks.isEmpty()) Text("You’re clear", color = StatusSafe)
+                if (state.tasks.isEmpty()) Text("You’re clear", color = LocalCampusColors.current.statusSafe)
                 state.tasks.forEach { task ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column(Modifier.weight(1f)) {
-                            Text(task.title, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                            Text(task.category, color = TextSecondary, fontSize = 12.sp)
+                            Text(task.title, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                            Text(task.category, color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                         }
                         NumberText(countdown(task.dueEpochMillis - now), fontSize = 12.sp)
                     }
@@ -168,8 +164,8 @@ fun DashboardScreen(
             GlassCard {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("Background reminders may be stopped", color = StatusWarn, fontWeight = FontWeight.Bold)
-                        Text("Your ${android.os.Build.MANUFACTURER} device may restrict alarms and focus timers.", color = TextSecondary)
+                        Text("Background reminders may be stopped", color = LocalCampusColors.current.statusWarning, fontWeight = FontWeight.Bold)
+                        Text("Your ${android.os.Build.MANUFACTURER} device may restrict alarms and focus timers.", color = LocalCampusColors.current.textSecondary)
                     }
                     Button(onClick = viewModel::dismissBatteryWarning) { Text("×") }
                 }
@@ -184,7 +180,7 @@ fun DashboardScreen(
     if (showToolPicker) {
         ModalBottomSheet(onDismissRequest = { showToolPicker = false }) {
             Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Pin up to three quick tools", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text("Pin up to three quick tools", color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 DashboardViewModel.TOOL_CATALOG.forEach { tool ->
                     val selected = tool in state.pinnedTools
                     Button(onClick = { viewModel.togglePinnedTool(tool) }, enabled = selected || state.pinnedTools.size < DashboardViewModel.PIN_LIMIT, modifier = Modifier.fillMaxWidth()) {
@@ -208,3 +204,4 @@ private fun countdown(milliseconds: Long): String {
         else -> "${remainingMinutes}m"
     }
 }
+
