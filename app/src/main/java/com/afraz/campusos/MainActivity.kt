@@ -40,7 +40,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
@@ -75,7 +74,7 @@ class MainActivity : ComponentActivity() {
         openScannerRequest.value = intent.getBooleanExtra(QuickScanTileService.EXTRA_OPEN_SCANNER, false)
         setContent {
             val palette by themeViewModel.selectedPalette.collectAsState()
-            SideEffect {
+            LaunchedEffect(palette) {
                 val statusStyle = if (palette.isDark) {
                     SystemBarStyle.dark(palette.canvas.toArgb())
                 } else {
