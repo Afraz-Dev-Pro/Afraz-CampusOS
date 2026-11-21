@@ -235,10 +235,7 @@ private fun String.toCampusColor(): Color? {
     val hex = trim().removePrefix("#")
     if (hex.length != 6 && hex.length != 8) return null
     if (hex.any { it.digitToIntOrNull(16) == null }) return null
-    return runCatching {
-        val value = hex.toLong(16)
-        if (hex.length == 6) Color(0xFF000000L or value) else Color(value.toULong())
-    }.getOrNull()
+    return runCatching { Color(android.graphics.Color.parseColor("#${if (hex.length == 6) "FF$hex" else hex}")) }.getOrNull()
 }
 
 private fun Color.toHex(): String = "#%08X".format(toArgb())

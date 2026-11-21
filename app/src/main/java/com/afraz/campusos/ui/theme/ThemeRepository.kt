@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -54,7 +55,7 @@ class ThemeRepository @Inject constructor(
     }
 
     private fun encodePalettes(palettes: List<CampusColorPalette>): String = palettes.joinToString(";") { palette ->
-        fun hex(color: Color) = color.value.toString(16)
+        fun hex(color: Color) = color.toArgb().toUInt().toString(16).padStart(8, '0')
         listOf(
             palette.id.replace(",", " "), palette.name.replace(Regex("[,;]"), " "),
             palette.isDark.toString(), hex(palette.canvas), hex(palette.surfacePrimary), hex(palette.surfaceElevated), hex(palette.navSurface),
@@ -68,7 +69,13 @@ class ThemeRepository @Inject constructor(
         val values = row.split(',')
         runCatching {
             require(values.size == 19)
-            fun color(index: Int) = Color(values[index].toULong(16))
+            fun color(index: Int): Color {
+                val stored = values[index].toULong(16)
+                val argb = if (stored <= 0xFFFF_FFFFUL) stored.toLong().toInt() else {
+                    runCatching { Color(stored).toArgb() }.getOrElse { stored.toLong().toInt() }
+                }
+                return Color(argb)
+            }
             CampusColorPalette(
                 id = values[0], name = values[1], isDark = values[2].toBooleanStrict(),
                 canvas = color(3), surfacePrimary = color(4), surfaceElevated = color(5), navSurface = color(6),
