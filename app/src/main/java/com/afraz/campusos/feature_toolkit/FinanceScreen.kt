@@ -1,5 +1,6 @@
 package com.afraz.campusos.feature_toolkit
 
+import com.afraz.campusos.ui.theme.LocalCampusColors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -63,16 +64,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.afraz.campusos.core.designsystem.AccentIndigo
 import com.afraz.campusos.core.designsystem.GlassCard
 import com.afraz.campusos.core.designsystem.NumberText
-import com.afraz.campusos.core.designsystem.StatusDanger
-import com.afraz.campusos.core.designsystem.StatusSafe
-import com.afraz.campusos.core.designsystem.StatusWarn
-import com.afraz.campusos.core.designsystem.SurfaceBento
-import com.afraz.campusos.core.designsystem.SurfaceElevated
-import com.afraz.campusos.core.designsystem.TextPrimary
-import com.afraz.campusos.core.designsystem.TextSecondary
 import com.afraz.campusos.core.util.UpiDeepLinkHelper
 import com.afraz.campusos.data.ExpenseGroupEntity
 import com.afraz.campusos.data.ExpenseSplitEntity
@@ -141,10 +134,10 @@ fun FinanceScreen(modifier: Modifier = Modifier, viewModel: FinanceViewModel = h
         ) {
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Finance", color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    IconButton(onClick = { viewModel.changeMonth(-1) }) { Icon(Icons.Filled.ChevronLeft, "Previous month", tint = TextSecondary) }
-                    Text(SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date(state.monthStartMillis)), color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                    IconButton(onClick = { viewModel.changeMonth(1) }) { Icon(Icons.Filled.ChevronRight, "Next month", tint = TextSecondary) }
+                    Text("Finance", color = LocalCampusColors.current.textPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    IconButton(onClick = { viewModel.changeMonth(-1) }) { Icon(Icons.Filled.ChevronLeft, "Previous month", tint = LocalCampusColors.current.textSecondary) }
+                    Text(SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date(state.monthStartMillis)), color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                    IconButton(onClick = { viewModel.changeMonth(1) }) { Icon(Icons.Filled.ChevronRight, "Next month", tint = LocalCampusColors.current.textSecondary) }
                 }
             }
             if (wide) {
@@ -217,17 +210,17 @@ fun FinanceScreen(modifier: Modifier = Modifier, viewModel: FinanceViewModel = h
 private fun BudgetOverview(spent: Long, budget: Long, budgetText: String, onBudgetChange: (String) -> Unit, onSaveBudget: () -> Unit) {
     val remaining = budget - spent
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Surface(color = SurfaceBento, shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) {
+        Surface(color = LocalCampusColors.current.surfacePrimary, shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                Text("SPENT THIS MONTH", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("SPENT THIS MONTH", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 NumberText(formatMoney(spent), fontSize = 30.sp)
                 LinearProgressIndicator(
                     progress = { if (budget <= 0) 1f else (spent.toFloat() / budget).coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth(),
-                    color = if (remaining >= 0) AccentIndigo else StatusDanger
+                    color = if (remaining >= 0) LocalCampusColors.current.accentPrimary else LocalCampusColors.current.statusDanger
                 )
-                Text(if (remaining >= 0) "${formatMoney(remaining)} remaining" else "${formatMoney(-remaining)} over budget", color = if (remaining >= 0) StatusSafe else StatusDanger, fontWeight = FontWeight.SemiBold)
-                Text("Monthly budget ${formatMoney(budget)}", color = TextSecondary, fontSize = 12.sp)
+                Text(if (remaining >= 0) "${formatMoney(remaining)} remaining" else "${formatMoney(-remaining)} over budget", color = if (remaining >= 0) LocalCampusColors.current.statusSafe else LocalCampusColors.current.statusDanger, fontWeight = FontWeight.SemiBold)
+                Text("Monthly budget ${formatMoney(budget)}", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
             }
         }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -244,16 +237,16 @@ private fun CategoryBreakdown(expenses: List<PersonalExpenseEntity>) {
     }
     val max = totals.values.maxOrNull()?.coerceAtLeast(1L) ?: 1L
     GlassCard {
-        Text("CATEGORY BREAKDOWN", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        Text("CATEGORY BREAKDOWN", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         financeCategories.forEach { category ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Icon(categoryIcon(category), contentDescription = "${category} category", tint = AccentIndigo, modifier = Modifier.size(20.dp))
+                Icon(categoryIcon(category), contentDescription = "${category} category", tint = LocalCampusColors.current.accentPrimary, modifier = Modifier.size(20.dp))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(category, color = TextPrimary, fontSize = 13.sp)
+                        Text(category, color = LocalCampusColors.current.textPrimary, fontSize = 13.sp)
                         NumberText(formatMoney(totals.getValue(category)), fontSize = 12.sp)
                     }
-                    LinearProgressIndicator(progress = { totals.getValue(category).toFloat() / max }, modifier = Modifier.fillMaxWidth(), color = AccentIndigo)
+                    LinearProgressIndicator(progress = { totals.getValue(category).toFloat() / max }, modifier = Modifier.fillMaxWidth(), color = LocalCampusColors.current.accentPrimary)
                 }
             }
         }
@@ -263,21 +256,21 @@ private fun CategoryBreakdown(expenses: List<PersonalExpenseEntity>) {
 @Composable
 private fun TransactionList(expenses: List<PersonalExpenseEntity>, modifier: Modifier = Modifier) {
     GlassCard(modifier) {
-        Text("TRANSACTIONS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        Text("TRANSACTIONS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         if (expenses.isEmpty()) {
-            Text("Your spending will appear here when you add an expense.", color = TextSecondary, modifier = Modifier.padding(vertical = 8.dp))
+            Text("Your spending will appear here when you add an expense.", color = LocalCampusColors.current.textSecondary, modifier = Modifier.padding(vertical = 8.dp))
         } else {
             val grouped = expenses.groupBy { startOfDay(it.timestamp) }
             grouped.forEach { (day, dayExpenses) ->
-                Text(DateFormat.getDateInstance(DateFormat.FULL).format(Date(day)), color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp))
+                Text(DateFormat.getDateInstance(DateFormat.FULL).format(Date(day)), color = LocalCampusColors.current.textSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp))
                 dayExpenses.forEach { expense ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Surface(color = SurfaceElevated, shape = CircleShape, modifier = Modifier.size(38.dp)) {
-                            Icon(categoryIcon(normalizeCategory(expense.category)), contentDescription = "${normalizeCategory(expense.category)} transaction", tint = AccentIndigo, modifier = Modifier.padding(9.dp))
+                        Surface(color = LocalCampusColors.current.surfaceElevated, shape = CircleShape, modifier = Modifier.size(38.dp)) {
+                            Icon(categoryIcon(normalizeCategory(expense.category)), contentDescription = "${normalizeCategory(expense.category)} transaction", tint = LocalCampusColors.current.accentPrimary, modifier = Modifier.padding(9.dp))
                         }
                         Column(Modifier.weight(1f)) {
-                            Text(expense.title, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                            Text(normalizeCategory(expense.category), color = TextSecondary, fontSize = 12.sp)
+                            Text(expense.title, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                            Text(normalizeCategory(expense.category), color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                         }
                         NumberText("−${formatMoney(expense.amountPaise)}", fontSize = 14.sp)
                     }
@@ -295,9 +288,9 @@ private fun SplitBalances(
 ) {
     val unsettled = state.splits.filterNot(ExpenseSplitEntity::isSettled)
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("GROUP SPLITS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        SplitBalanceCard("You owe", "Outgoing payments", StatusDanger, unsettled, groups, onSettle, "No unpaid group splits.")
-        SplitBalanceCard("Owed to you", "Incoming balances", StatusSafe, emptyList(), groups, onSettle, "No incoming balances are recorded yet.")
+        Text("GROUP SPLITS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        SplitBalanceCard("You owe", "Outgoing payments", LocalCampusColors.current.statusDanger, unsettled, groups, onSettle, "No unpaid group splits.")
+        SplitBalanceCard("Owed to you", "Incoming balances", LocalCampusColors.current.statusSafe, emptyList(), groups, onSettle, "No incoming balances are recorded yet.")
     }
 }
 
@@ -311,16 +304,16 @@ private fun SplitBalanceCard(
     onSettle: (ExpenseSplitEntity, String) -> Unit,
     emptyText: String
 ) {
-    Surface(color = SurfaceBento, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
+    Surface(color = LocalCampusColors.current.surfacePrimary, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, color = tint, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Text(subtitle, color = TextSecondary, fontSize = 12.sp)
-            if (splits.isEmpty()) Text(emptyText, color = TextSecondary, fontSize = 13.sp)
+            Text(subtitle, color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
+            if (splits.isEmpty()) Text(emptyText, color = LocalCampusColors.current.textSecondary, fontSize = 13.sp)
             splits.forEach { split ->
                 val groupTitle = groups[split.groupId]?.title ?: "Group expense"
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text(split.friendName, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                        Text(split.friendName, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
                         Text("$groupTitle · Unsettled", color = tint, fontSize = 12.sp)
                         NumberText(formatMoney(split.shareAmountPaise), fontSize = 14.sp)
                     }
@@ -342,16 +335,16 @@ private fun AddExpenseSheet(onDismiss: () -> Unit, onSave: (String, String, Stri
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        containerColor = SurfaceElevated,
+        containerColor = LocalCampusColors.current.surfaceElevated,
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) }
     ) {
         Column(
             Modifier.fillMaxWidth().imePadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Add expense", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("Add expense", color = LocalCampusColors.current.textPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
             OutlinedTextField(amount, { amount = it.filter { ch -> ch.isDigit() || ch == '.' }.take(12) }, label = { Text("Amount ₹") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            Text("CATEGORY", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text("CATEGORY", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             financeCategories.chunked(2).forEach { row ->
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     row.forEach { option ->
@@ -416,3 +409,4 @@ private fun dateFromUtcMillis(time: Long): Long {
         set(utc.get(Calendar.YEAR), utc.get(Calendar.MONTH), utc.get(Calendar.DAY_OF_MONTH), 12, 0, 0)
     }.timeInMillis
 }
+

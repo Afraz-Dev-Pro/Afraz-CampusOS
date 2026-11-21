@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
+import androidx.activity.viewModels
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -24,7 +25,6 @@ import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,19 +40,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.afraz.campusos.core.designsystem.GlassBorderBottom
-import com.afraz.campusos.core.designsystem.GlassBorderTop
-import com.afraz.campusos.core.designsystem.GlassFill
 import com.afraz.campusos.feature_academics.AcademicsScreen
 import com.afraz.campusos.feature_dashboard.AboutScreen
 import com.afraz.campusos.feature_dashboard.HomeScreen
@@ -62,21 +59,36 @@ import com.afraz.campusos.feature_toolkit.ToolsScreen
 import com.afraz.campusos.feature_toolkit.tile.QuickScanTileService
 import com.afraz.campusos.navigation.CampusRoute
 import com.afraz.campusos.ui.theme.CampusOsTheme
+import com.afraz.campusos.ui.theme.LocalCampusColors
+import com.afraz.campusos.ui.theme.ThemeViewModel
+import androidx.compose.runtime.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val openScannerRequest = androidx.compose.runtime.mutableStateOf(false)
+    private val themeViewModel: ThemeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(android.graphics.Color.rgb(246, 238, 214), android.graphics.Color.rgb(63, 36, 23)),
-            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.rgb(246, 238, 214), android.graphics.Color.rgb(63, 36, 23))
-        )
+        enableEdgeToEdge()
         openScannerRequest.value = intent.getBooleanExtra(QuickScanTileService.EXTRA_OPEN_SCANNER, false)
         setContent {
-            CampusOsTheme {
+            val palette by themeViewModel.selectedPalette.collectAsState()
+            SideEffect {
+                val statusStyle = if (palette.isDark) {
+                    SystemBarStyle.dark(palette.canvas.toArgb())
+                } else {
+                    SystemBarStyle.light(palette.canvas.toArgb(), palette.canvas.toArgb())
+                }
+                val navigationStyle = if (palette.isDark) {
+                    SystemBarStyle.dark(palette.navSurface.toArgb())
+                } else {
+                    SystemBarStyle.light(palette.navSurface.toArgb(), palette.navSurface.toArgb())
+                }
+                enableEdgeToEdge(statusBarStyle = statusStyle, navigationBarStyle = navigationStyle)
+            }
+            CampusOsTheme(palette) {
                 CampusNavScaffold(
                     openScannerRequest = openScannerRequest.value,
                     onScannerConsumed = { openScannerRequest.value = false },
@@ -107,6 +119,7 @@ private fun CampusNavScaffold(
     onScannerConsumed: () -> Unit,
     onScannerRequested: () -> Unit
 ) {
+    val colors = LocalCampusColors.current
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route.orEmpty()
@@ -148,15 +161,11 @@ private fun CampusNavScaffold(
             bottomBar = {
                 if (compact && !isAboutPage) {
                     androidx.compose.material3.Surface(
-                        color = GlassFill,
+                        color = colors.navSurface,
                         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(
-                                width = 1.dp,
-                                brush = Brush.verticalGradient(listOf(GlassBorderTop, GlassBorderBottom)),
-                                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-                            )
+                            .border(1.dp, colors.borderSubtle, RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
                     ) {
                         NavigationBar(
                             containerColor = Color.Transparent,
@@ -195,7 +204,7 @@ private fun CampusNavScaffold(
                     .padding(contentInsets)
             ) {
                 if (!compact && !isAboutPage) {
-                    NavigationRail {
+                    NavigationRail(containerColor = colors.navSurface) {
                         destinations.forEach { destination ->
                             NavigationRailItem(
                                 selected = isSelected(currentRoute, destination.route),

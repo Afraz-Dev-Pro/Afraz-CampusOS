@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun NumberText(value: String, modifier: Modifier = Modifier, fontSize: TextUnit = 16.sp, color: Color = TextPrimary) {
+fun NumberText(value: String, modifier: Modifier = Modifier, fontSize: TextUnit = 16.sp, color: Color = Color.Unspecified) {
     Text(value, modifier = modifier, color = color, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = fontSize, style = TextStyle(fontFeatureSettings = "\"tnum\""))
 }
 

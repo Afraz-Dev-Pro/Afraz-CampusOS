@@ -1,5 +1,6 @@
 package com.afraz.campusos.feature_toolkit
 
+import com.afraz.campusos.ui.theme.LocalCampusColors
 import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -62,8 +63,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.afraz.campusos.core.designsystem.GlassCard
-import com.afraz.campusos.core.designsystem.TextPrimary
-import com.afraz.campusos.core.designsystem.TextSecondary
 import com.afraz.campusos.data.WalletDocEntity
 import com.afraz.campusos.feature_toolkit.focus.PomodoroForegroundService
 import com.afraz.campusos.feature_toolkit.focus.PomodoroForegroundService.Companion.ACTION_PAUSE
@@ -174,21 +173,21 @@ fun ToolsScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = false
     LazyColumn(modifier.fillMaxSize().padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Spacer(Modifier.height(16.dp))
-            Text(if (walletOnly) "Digital ID" else "Tools", color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-            Text(if (walletOnly) "Your campus documents, ready when you need them." else "Campus helpers that work offline.", color = TextSecondary)
+            Text(if (walletOnly) "Digital ID" else "Tools", color = LocalCampusColors.current.textPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text(if (walletOnly) "Your campus documents, ready when you need them." else "Campus helpers that work offline.", color = LocalCampusColors.current.textSecondary)
         }
-        if (!walletOnly) item { Text("STUDY", color = TextSecondary, fontWeight = FontWeight.Bold) }
+        if (!walletOnly) item { Text("STUDY", color = LocalCampusColors.current.textSecondary, fontWeight = FontWeight.Bold) }
         if (!walletOnly) item {
             GlassCard {
-                Text("DOCUMENT SCANNER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Google Play services scans pages without a camera permission.", color = TextPrimary)
+                Text("DOCUMENT SCANNER", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Google Play services scans pages without a camera permission.", color = LocalCampusColors.current.textPrimary)
                 Button(onClick = launchScanner) { Text("Scan notes") }
-                if (scanMessage.isNotBlank()) Text(scanMessage, color = TextSecondary)
+                if (scanMessage.isNotBlank()) Text(scanMessage, color = LocalCampusColors.current.textSecondary)
             }
         }
         if (!walletOnly) item {
             GlassCard {
-                Text("NATIVE PDF MAKER", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("NATIVE PDF MAKER", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(pdfTitle, { pdfTitle = it }, label = { Text("PDF title") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(noteText, { noteText = it }, label = { Text("Notes · separate pages with ---PAGE---") }, modifier = Modifier.fillMaxWidth(), minLines = 4)
                 Button(onClick = { viewModel.createNotesPdf(pdfTitle.ifBlank { "Notes" }, noteText); pdfTitle = ""; noteText = "" }, enabled = noteText.isNotBlank()) { Text("Create A4 PDF from notes") }
@@ -196,7 +195,7 @@ fun ToolsScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = false
                 Button(onClick = { imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) { Text("Choose images and create PDF") }
                 Button(onClick = takePhoto) { Text("Take photo for PDF") }
                 if (capturedPhotos.isNotEmpty()) {
-                    Text("${capturedPhotos.size} photo(s) captured. Take more pages or create the PDF.", color = TextSecondary)
+                    Text("${capturedPhotos.size} photo(s) captured. Take more pages or create the PDF.", color = LocalCampusColors.current.textSecondary)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = { viewModel.createImagePdf(imagePdfTitle.ifBlank { "Scanned pages" }, capturedPhotos); capturedPhotos = emptyList() }) { Text("Create PDF from photos") }
                         Button(onClick = { capturedPhotos = emptyList() }) { Text("Clear photos") }
@@ -207,10 +206,10 @@ fun ToolsScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = false
         }
         if (!walletOnly) item {
             GlassCard {
-                Text("POMODORO FOCUS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text(if (focusActive) if (focusPaused) "Focus paused" else "Focus session active" else "Ready for a focus block", color = TextPrimary)
-                Text("%02d:%02d".format(focusSeconds / 60, focusSeconds % 60), color = TextPrimary, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 28.sp)
-                Text("Controls also stay in your notification shade.", color = TextSecondary)
+                Text("POMODORO FOCUS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(if (focusActive) if (focusPaused) "Focus paused" else "Focus session active" else "Ready for a focus block", color = LocalCampusColors.current.textPrimary)
+                Text("%02d:%02d".format(focusSeconds / 60, focusSeconds % 60), color = LocalCampusColors.current.textPrimary, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                Text("Controls also stay in your notification shade.", color = LocalCampusColors.current.textSecondary)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); focusSeconds = 25 * 60; focusActive = true; focusPaused = false; startFocus() }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Start") }
                     Button(onClick = { haptics.performHapticFeedback(HapticFeedbackType.LongPress); if (!focusActive) focusActive = true; focusPaused = !focusPaused; PomodoroForegroundService.sendAction(context, ACTION_PAUSE) }, modifier = Modifier.heightIn(min = 48.dp)) { Text(if (focusPaused) "Resume" else "Pause") }
@@ -219,27 +218,27 @@ fun ToolsScreen(modifier: Modifier = Modifier, autoStartScanner: Boolean = false
                 }
             }
         }
-        if (!walletOnly) item { Text("CAMPUS", color = TextSecondary, fontWeight = FontWeight.Bold) }
+        if (!walletOnly) item { Text("CAMPUS", color = LocalCampusColors.current.textSecondary, fontWeight = FontWeight.Bold) }
         if (!walletOnly) item {
             GlassCard {
-                Text("DIGITAL ID & CAMPUS PASSES", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("DIGITAL ID & CAMPUS PASSES", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Button(onClick = { documentPicker.launch(arrayOf("image/*", "application/pdf")) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Add ID or pass") }
                 state.documents.forEach { doc ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text(doc.title, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                            Text("${doc.docType} · ${doc.subjectFolder ?: "Campus"}", color = TextSecondary, fontSize = 12.sp)
+                            Text(doc.title, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                            Text("${doc.docType} · ${doc.subjectFolder ?: "Campus"}", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                         }
                         Button(onClick = { if (doc.mimeType.startsWith("image/")) viewingDoc = doc else openPdf(context, doc.localFilePath) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Open") }
                     }
                 }
             }
         }
-        if (!walletOnly) item { Text("DATA", color = TextSecondary, fontWeight = FontWeight.Bold) }
+        if (!walletOnly) item { Text("DATA", color = LocalCampusColors.current.textSecondary, fontWeight = FontWeight.Bold) }
         if (!walletOnly) item {
             GlassCard {
-                Text("LOCAL BACKUP", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Export or restore your local campus data as JSON using the Android file picker.", color = TextPrimary)
+                Text("LOCAL BACKUP", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Export or restore your local campus data as JSON using the Android file picker.", color = LocalCampusColors.current.textPrimary)
                 Button(onClick = { backupPicker.launch("campusos_backup_v1.json") }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Export JSON") }
                 Button(onClick = { restorePicker.launch(arrayOf("application/json", "application/gzip", "application/octet-stream")) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Restore JSON") }
             }

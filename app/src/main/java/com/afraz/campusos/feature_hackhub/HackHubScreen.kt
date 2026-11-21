@@ -1,5 +1,6 @@
 package com.afraz.campusos.feature_hackhub
 
+import com.afraz.campusos.ui.theme.LocalCampusColors
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -48,8 +49,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.afraz.campusos.core.designsystem.GlassCard
-import com.afraz.campusos.core.designsystem.TextPrimary
-import com.afraz.campusos.core.designsystem.TextSecondary
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -93,9 +92,9 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
     LazyColumn(modifier.fillMaxSize().padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Spacer(Modifier.height(16.dp))
-            Text("HackHub", color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-            Text("Find teammates, events and past papers.", color = TextSecondary)
-            Text(if (online) "Online · Community and feeds available" else "Offline · Showing cached items", color = TextSecondary, modifier = Modifier.padding(top = 8.dp))
+            Text("HackHub", color = LocalCampusColors.current.textPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text("Find teammates, events and past papers.", color = LocalCampusColors.current.textSecondary)
+            Text(if (online) "Online · Community and feeds available" else "Offline · Showing cached items", color = LocalCampusColors.current.textSecondary, modifier = Modifier.padding(top = 8.dp))
         }
         item {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -106,15 +105,15 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
         }
         if (selectedView == "Hackathons & Bounties") item {
             GlassCard {
-                Text("HACKATHONS & SPONSOR BOUNTIES", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                if (state.usingSeedData) Text("Showing bundled starter events · remote feed will replace these when available", color = TextSecondary, fontSize = 12.sp)
+                Text("HACKATHONS & SPONSOR BOUNTIES", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                if (state.usingSeedData) Text("Showing bundled starter events · remote feed will replace these when available", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                 if (state.loading) CircularProgressIndicator()
                 state.hackathons.forEach { event ->
                     Column(Modifier.fillMaxWidth().padding(vertical = 7.dp)) {
-                        Text(event.eventName, color = TextPrimary, fontWeight = FontWeight.Bold)
-                        Text("${event.startsAt.take(10)} – ${event.endsAt.take(10)} · ${event.prizePool}", color = TextSecondary)
-                        Text("Registration: ${countdown(event.registrationDeadline)}", color = TextPrimary, fontSize = 12.sp)
-                        Text("Sponsor tracks: ${event.sponsorTracks.joinToString()}", color = TextSecondary, fontSize = 12.sp)
+                        Text(event.eventName, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.Bold)
+                        Text("${event.startsAt.take(10)} – ${event.endsAt.take(10)} · ${event.prizePool}", color = LocalCampusColors.current.textSecondary)
+                        Text("Registration: ${countdown(event.registrationDeadline)}", color = LocalCampusColors.current.textPrimary, fontSize = 12.sp)
+                        Text("Sponsor tracks: ${event.sponsorTracks.joinToString()}", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                         Button(onClick = { openExternal(context, event.applyUrl) }) { Text("Apply Now") }
                     }
                 }
@@ -123,10 +122,10 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
         if (selectedView == "Teammates") item {
             GlassCard {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("TEAMMATE REQUESTS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("TEAMMATE REQUESTS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     Button(onClick = viewModel::refreshTeammates) { Text("Refresh") }
                 }
-                Text("Posts expire after 14 days. Open profiles or contact links to connect.", color = TextSecondary, fontSize = 12.sp)
+                Text("Posts expire after 14 days. Open profiles or contact links to connect.", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Button(onClick = { viewModel.selectSkill(null) }) { Text("All") }
                     skillTags.forEach { tag ->
@@ -137,19 +136,19 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
                 val visiblePosts = state.teammatePosts.filter { post ->
                     state.selectedSkill == null || post.skills.any { it.equals(state.selectedSkill, true) }
                 }
-                if (visiblePosts.isEmpty() && !state.loading) Text("No active teammate requests yet.", color = TextSecondary)
+                if (visiblePosts.isEmpty() && !state.loading) Text("No active teammate requests yet.", color = LocalCampusColors.current.textSecondary)
                 visiblePosts.forEach { post -> TeammateCard(post) { openExternal(context, connectUrl(post)) } }
                 Button(onClick = viewModel::loadMore, enabled = state.teammatePosts.isNotEmpty() && !state.loadingMore) { Text(if (state.loadingMore) "Loading…" else "Load more") }
             }
         }
         if (selectedView == "Previous Papers") item {
             GlassCard {
-                Text("PREVIOUS PAPERS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                if (state.pyqs.isEmpty()) Text("No previous papers are available in the cached feed yet.", color = TextSecondary)
+                Text("PREVIOUS PAPERS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                if (state.pyqs.isEmpty()) Text("No previous papers are available in the cached feed yet.", color = LocalCampusColors.current.textSecondary)
                 state.pyqs.forEach { paper ->
                     Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                        Text(paper.subjectName, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                        Text("${paper.courseCode} · Semester ${paper.semester} · ${paper.year}", color = TextSecondary)
+                        Text(paper.subjectName, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                        Text("${paper.courseCode} · Semester ${paper.semester} · ${paper.year}", color = LocalCampusColors.current.textSecondary)
                         Button(onClick = { openExternal(context, paper.pdfUrl) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Open paper") }
                     }
                 }
@@ -162,8 +161,8 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
     if (state.showAuthSheet) {
         ModalBottomSheet(onDismissRequest = viewModel::dismissAuth) {
             Column(Modifier.fillMaxWidth().padding(22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Sign in when you need community or backup", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text("Your timetable, attendance and toolkit remain available offline without an account.", color = TextSecondary)
+                Text("Sign in when you need community or backup", color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text("Your timetable, attendance and toolkit remain available offline without an account.", color = LocalCampusColors.current.textSecondary)
                 Button(onClick = { viewModel.signIn(activity) }) { Text("Continue with Google") }
                 state.error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
             }
@@ -172,7 +171,7 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
     if (state.showPostForm) {
         ModalBottomSheet(onDismissRequest = viewModel::dismissPostForm) {
             Column(Modifier.fillMaxWidth().padding(22.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Post a teammate request", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text("Post a teammate request", color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 OutlinedTextField(author, { author = it.take(40) }, label = { Text("Name (max 40)") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(college, { college = it.take(60) }, label = { Text("College (max 60)") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(pitch, { pitch = it.take(150) }, label = { Text("Project pitch (max 150)") }, modifier = Modifier.fillMaxWidth())
@@ -195,12 +194,12 @@ private fun TeammateCard(post: TeammatePost, onConnect: () -> Unit) {
                     AsyncImage(model = "https://github.com/${post.githubUsername}.png", contentDescription = "${post.authorName} avatar", modifier = Modifier.clip(CircleShape).height(42.dp))
                 }
                 Column {
-                    Text(post.authorName, color = TextPrimary, fontWeight = FontWeight.Bold)
-                    Text(post.college, color = TextSecondary, fontSize = 12.sp)
+                    Text(post.authorName, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.Bold)
+                    Text(post.college, color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                 }
             }
-            Text(post.pitchBio, color = TextPrimary, modifier = Modifier.padding(top = 8.dp))
-            Text(post.skills.joinToString(" · "), color = TextSecondary, fontSize = 12.sp)
+            Text(post.pitchBio, color = LocalCampusColors.current.textPrimary, modifier = Modifier.padding(top = 8.dp))
+            Text(post.skills.joinToString(" · "), color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
             Button(onClick = onConnect) { Text("Connect") }
         }
     }

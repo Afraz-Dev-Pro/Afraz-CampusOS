@@ -1,5 +1,6 @@
 package com.afraz.campusos.feature_academics
 
+import com.afraz.campusos.ui.theme.LocalCampusColors
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -59,14 +60,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.afraz.campusos.core.designsystem.BgCanvas
 import com.afraz.campusos.core.designsystem.GlassCard
 import com.afraz.campusos.core.designsystem.NumberText
-import com.afraz.campusos.core.designsystem.StatusDanger
-import com.afraz.campusos.core.designsystem.StatusSafe
-import com.afraz.campusos.core.designsystem.StatusWarn
-import com.afraz.campusos.core.designsystem.TextPrimary
-import com.afraz.campusos.core.designsystem.TextSecondary
 import com.afraz.campusos.core.util.BunkAdvice
 import com.afraz.campusos.core.util.BunkCalculator
 import com.afraz.campusos.core.util.TimetableCodec
@@ -76,7 +71,6 @@ import com.afraz.campusos.core.util.GradeCalculator
 import com.afraz.campusos.data.CourseEntity
 import com.afraz.campusos.data.TaskEntity
 import com.afraz.campusos.data.SyllabusTopicEntity
-import com.afraz.campusos.core.designsystem.SurfaceBento
 import java.text.DateFormat
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
@@ -145,13 +139,13 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
     LazyColumn(modifier.padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Spacer(Modifier.height(16.dp))
-            Text("Classes", color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-            Text("Your timetable, attendance and progress stay on this device.", color = TextSecondary)
+            Text("Classes", color = LocalCampusColors.current.textPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text("Your timetable, attendance and progress stay on this device.", color = LocalCampusColors.current.textSecondary)
         }
         item {
             GlassCard {
-                Text("WEEKLY TIMETABLE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Choose a day, add courses, then add one or more time slots. Save Course stores the subject details so they can be scheduled and tracked for attendance.", color = TextSecondary, fontSize = 12.sp)
+                Text("WEEKLY TIMETABLE", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Choose a day, add courses, then add one or more time slots. Save Course stores the subject details so they can be scheduled and tracked for attendance.", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                 OutlinedButton(onClick = { timetableAssetPicker.launch(arrayOf("image/*", "application/pdf")) }) { Text("Add timetable image or PDF") }
                 Spacer(Modifier.height(10.dp))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
@@ -162,25 +156,25 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
                             modifier = Modifier.heightIn(min = 48.dp).width(56.dp),
                             shape = RoundedCornerShape(10.dp),
                             colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                containerColor = if (state.selectedDay == dayNumber) com.afraz.campusos.core.designsystem.AccentIndigo else com.afraz.campusos.core.designsystem.SurfaceElevated
+                                containerColor = if (state.selectedDay == dayNumber) LocalCampusColors.current.accentPrimary else LocalCampusColors.current.surfaceElevated
                             )
                         ) { Text(dayNames[index], maxLines = 1) }
                     }
                 }
                 Spacer(Modifier.height(8.dp))
                 val daySlots = state.slots.filter { it.dayOfWeek == state.selectedDay }
-                if (daySlots.isEmpty()) Text("No classes for ${dayNames[state.selectedDay - 1]}.", color = TextSecondary)
+                if (daySlots.isEmpty()) Text("No classes for ${dayNames[state.selectedDay - 1]}.", color = LocalCampusColors.current.textSecondary)
                 daySlots.forEach { slot ->
                     val course = state.courses.firstOrNull { it.id == slot.courseId }
-                    Surface(color = SurfaceBento, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                    Surface(color = LocalCampusColors.current.surfacePrimary, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                         Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                             NumberText("${slot.startMinutes.toTime()}–${slot.endMinutes.toTime()}", fontSize = 12.sp)
                             Column(Modifier.weight(1f)) {
-                                Text(course?.name ?: "Course removed", color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                                Text("${course?.code.orEmpty()} · ${course?.professor.orEmpty()}", color = TextSecondary, fontSize = 12.sp)
+                                Text(course?.name ?: "Course removed", color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                                Text("${course?.code.orEmpty()} · ${course?.professor.orEmpty()}", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                             }
-                            Surface(color = com.afraz.campusos.core.designsystem.SurfaceElevated, shape = RoundedCornerShape(8.dp)) {
-                                Text(course?.room?.ifBlank { "Room —" } ?: "Room —", color = TextSecondary, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp))
+                            Surface(color = LocalCampusColors.current.surfaceElevated, shape = RoundedCornerShape(8.dp)) {
+                                Text(course?.room?.ifBlank { "Room —" } ?: "Room —", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp))
                             }
                         }
                     }
@@ -203,12 +197,12 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
                         }) { Text("Send") }
                     }
                 }
-                if (timetableMessage.isNotBlank()) Text(timetableMessage, color = TextSecondary)
+                if (timetableMessage.isNotBlank()) Text(timetableMessage, color = LocalCampusColors.current.textSecondary)
             }
         }
         item {
             GlassCard {
-                Text("ADD COURSE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("ADD COURSE", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(courseName, { courseName = it }, label = { Text("Course name") }, modifier = Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(courseCode, { courseCode = it }, label = { Text("Code") }, modifier = Modifier.weight(1f))
@@ -227,7 +221,7 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
         }
         if (state.courses.isNotEmpty()) item {
             GlassCard {
-                Text("ADD TIMETABLE SLOT", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("ADD TIMETABLE SLOT", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     state.courses.forEach { course ->
                         Button(onClick = { slotCourse = course.id }, enabled = slotCourse != course.id) { Text(course.code) }
@@ -243,7 +237,7 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
                         timetableMessage = "Added to ${dayNames[state.selectedDay - 1]}"
                     } else timetableMessage = "Choose a course and enter a valid end time after the start time."
                 }, enabled = slotCourse.isNotBlank()) { Text("Add to ${dayNames[state.selectedDay - 1]}") }
-                Text("Selected day: ${dayNames[state.selectedDay - 1]}", color = TextSecondary)
+                Text("Selected day: ${dayNames[state.selectedDay - 1]}", color = LocalCampusColors.current.textSecondary)
             }
         }
         if (expanded && state.courses.isNotEmpty()) {
@@ -256,7 +250,7 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
                 )
             }
         }
-        item { Text("COURSES & ATTENDANCE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+        item { Text("COURSES & ATTENDANCE", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
         items(state.courses, key = { "course-${it.id}" }) { course ->
             AttendanceCard(
                 course,
@@ -269,15 +263,15 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
         }
         item {
             GlassCard {
-                Text("PYQ VAULT", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("PYQ VAULT", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(pyqSearch, { pyqSearch = it }, label = { Text("Search subject, code or semester") }, modifier = Modifier.fillMaxWidth())
                 val papers = state.pyqs.filter { paper -> pyqSearch.isBlank() || paper.subjectName.contains(pyqSearch, true) || paper.courseCode.contains(pyqSearch, true) || paper.semester.toString() == pyqSearch }
-                if (papers.isEmpty()) Text("No papers match this search yet.", color = TextSecondary)
+                if (papers.isEmpty()) Text("No papers match this search yet.", color = LocalCampusColors.current.textSecondary)
                 papers.forEach { paper ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text(paper.subjectName, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                            Text("${paper.courseCode} · semester ${paper.semester} · ${paper.year}", color = TextSecondary, fontSize = 12.sp)
+                            Text(paper.subjectName, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                            Text("${paper.courseCode} · semester ${paper.semester} · ${paper.year}", color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                         }
                         Button(onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(paper.pdfUrl))) } }) { Text("Open PDF") }
                     }
@@ -286,7 +280,7 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
         }
         item {
             GlassCard {
-                Text("ASSIGNMENTS & EXAMS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("ASSIGNMENTS & EXAMS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(taskTitle, { taskTitle = it }, label = { Text("Task title") }, modifier = Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Button(onClick = { taskCategory = "ASSIGNMENT" }, enabled = taskCategory != "ASSIGNMENT") { Text("Assignment") }
@@ -322,14 +316,14 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
             var topicText by remember(course.id) { mutableStateOf("") }
             var topicUnit by remember(course.id) { mutableStateOf("1") }
             GlassCard {
-                Text("${course.name.uppercase()} · SYLLABUS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("${course.name.uppercase()} · SYLLABUS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 val progress = if (topics.isEmpty()) 0f else topics.count { it.isCompleted }.toFloat() / topics.size
-                Text("${(progress * 100).toInt()}% revised", color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                CircularProgressIndicator(progress = { progress }, color = StatusSafe)
+                Text("${(progress * 100).toInt()}% revised", color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                CircularProgressIndicator(progress = { progress }, color = LocalCampusColors.current.statusSafe)
                 topics.forEach { topic ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(topic.isCompleted, onCheckedChange = { viewModel.setTopicDone(topic.id, it) })
-                        Text("Unit ${topic.unitNumber} · ${topic.topicTitle}", color = TextPrimary)
+                        Text("Unit ${topic.unitNumber} · ${topic.topicTitle}", color = LocalCampusColors.current.textPrimary)
                     }
                 }
                 OutlinedTextField(topicText, { topicText = it }, label = { Text("Add a syllabus topic") }, modifier = Modifier.fillMaxWidth())
@@ -339,8 +333,8 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
         }
         item {
             GlassCard {
-                Text("ACADEMIC TOOLS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Keep grade planning separate from your daily timetable.", color = TextSecondary, fontSize = 13.sp)
+                Text("ACADEMIC TOOLS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Keep grade planning separate from your daily timetable.", color = LocalCampusColors.current.textSecondary, fontSize = 13.sp)
                 Button(onClick = { showAcademicTools = true }) { Text("Open SGPA & CGPA calculator") }
             }
         }
@@ -355,24 +349,24 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
     if (showAcademicTools) {
         ModalBottomSheet(onDismissRequest = { showAcademicTools = false }) {
             Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("SGPA & TARGET CGPA", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text("SGPA & TARGET CGPA", color = LocalCampusColors.current.textPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(gradeSemester, { gradeSemester = it.filter(Char::isDigit) }, label = { Text("Semester") }, modifier = Modifier.fillMaxWidth())
                 state.courses.forEach { course ->
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text("${course.code} · ${course.credits} cr", color = TextPrimary, modifier = Modifier.weight(1f))
+                        Text("${course.code} · ${course.credits} cr", color = LocalCampusColors.current.textPrimary, modifier = Modifier.weight(1f))
                         OutlinedTextField(courseGrades[course.id].orEmpty(), { courseGrades = courseGrades + (course.id to it.uppercase().take(2)) }, label = { Text("Grade") }, modifier = Modifier.weight(1f))
                     }
                 }
                 OutlinedTextField(customGradeScale, { customGradeScale = it }, label = { Text("Custom scale: O=10,E=9,A=8,B=7,C=6,D=5,F=0") }, modifier = Modifier.fillMaxWidth())
                 val scale = GradeCalculator.parseScale(customGradeScale)
                 val calculatedSgpa = scale?.let { GradeCalculator.sgpa(state.courses.map { course -> CourseGrade(course.credits, courseGrades[course.id].orEmpty()) }, it) }
-                Text(calculatedSgpa?.let { "Calculated SGPA: ${"%.2f".format(it)}" } ?: "Enter course grades to calculate SGPA", color = TextSecondary)
+                Text(calculatedSgpa?.let { "Calculated SGPA: ${"%.2f".format(it)}" } ?: "Enter course grades to calculate SGPA", color = LocalCampusColors.current.textSecondary)
                 OutlinedTextField(sgpa, { sgpa = it }, label = { Text("Or enter SGPA manually (0–10)") }, modifier = Modifier.fillMaxWidth())
                 Button(onClick = {
                     val value = calculatedSgpa ?: sgpa.toDoubleOrNull() ?: -1.0
                     viewModel.saveGrade(gradeSemester.toIntOrNull() ?: 1, value, state.courses.sumOf { it.credits })
                 }) { Text("Save semester grade") }
-                Text("Recorded: ${state.grades.sortedBy { it.semesterNumber }.joinToString { "S${it.semesterNumber} ${"%.2f".format(it.sgpa)}" }.ifBlank { "none" }}", color = TextSecondary)
+                Text("Recorded: ${state.grades.sortedBy { it.semesterNumber }.joinToString { "S${it.semesterNumber} ${"%.2f".format(it.sgpa)}" }.ifBlank { "none" }}", color = LocalCampusColors.current.textSecondary)
                 OutlinedTextField(targetCgpa, { targetCgpa = it }, label = { Text("Desired final CGPA") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(totalSemesters, { totalSemesters = it.filter(Char::isDigit) }, label = { Text("Total semesters") }, modifier = Modifier.fillMaxWidth())
                 val count = totalSemesters.toIntOrNull() ?: 0
@@ -380,7 +374,7 @@ fun ClassesScreen(modifier: Modifier = Modifier, viewModel: ClassesViewModel = h
                 if (count > 0 && target in 0.0..10.0 && state.grades.size <= count) {
                     val remaining = count - state.grades.size
                     val required = if (remaining == 0) 0.0 else ((target * count - state.grades.sumOf { it.sgpa }) / remaining)
-                    Text(if (remaining == 0) "All semesters are recorded" else "Required average in next $remaining semesters: ${"%.2f".format(required)} SGPA", color = if (required > 10.0) StatusDanger else TextPrimary)
+                    Text(if (remaining == 0) "All semesters are recorded" else "Required average in next $remaining semesters: ${"%.2f".format(required)} SGPA", color = if (required > 10.0) LocalCampusColors.current.statusDanger else LocalCampusColors.current.textPrimary)
                 }
             }
         }
@@ -392,10 +386,10 @@ private fun AttendanceCard(course: CourseEntity, onPresent: () -> Unit, onAbsent
     var targetText by remember(course.id) { mutableStateOf((course.targetPercentage * 100).toInt().toString()) }
     val summary = BunkCalculator.calculate(course.attendedClasses, course.totalClasses, course.targetPercentage)
     val tint = when (val advice = summary.advice) {
-        BunkAdvice.NoClasses -> TextSecondary
-        BunkAdvice.OnTheEdge -> StatusWarn
-        is BunkAdvice.SafeToBunk -> StatusSafe
-        is BunkAdvice.MustAttend -> StatusDanger
+        BunkAdvice.NoClasses -> LocalCampusColors.current.textSecondary
+        BunkAdvice.OnTheEdge -> LocalCampusColors.current.statusWarning
+        is BunkAdvice.SafeToBunk -> LocalCampusColors.current.statusSafe
+        is BunkAdvice.MustAttend -> LocalCampusColors.current.statusDanger
     }
     val message = when (val advice = summary.advice) {
         BunkAdvice.NoClasses -> "No classes logged yet"
@@ -407,8 +401,8 @@ private fun AttendanceCard(course: CourseEntity, onPresent: () -> Unit, onAbsent
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             CircularProgressIndicator(progress = { ((summary.percentage ?: 0.0) / 100.0).toFloat().coerceIn(0f, 1f) }, color = tint)
             Column(Modifier.weight(1f)) {
-                Text(course.name, color = TextPrimary, fontWeight = FontWeight.Bold, modifier = Modifier.clickable(onClick = onDetails))
-                Text("${course.code} · ${course.attendedClasses}/${course.totalClasses}", color = TextSecondary)
+                Text(course.name, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.Bold, modifier = Modifier.clickable(onClick = onDetails))
+                Text("${course.code} · ${course.attendedClasses}/${course.totalClasses}", color = LocalCampusColors.current.textSecondary)
                 Text(message, color = tint, fontSize = 12.sp)
             }
             NumberText(summary.percentage?.let { "%.1f%%".format(it) } ?: "—", fontSize = 14.sp)
@@ -430,12 +424,12 @@ private fun TaskRow(task: TaskEntity, onDone: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Checkbox(task.isCompleted, onCheckedChange = { onDone() })
         Column(Modifier.weight(1f)) {
-            Text(task.title, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+            Text(task.title, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
             val remaining = task.dueEpochMillis - System.currentTimeMillis()
             val dueDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(task.dueEpochMillis))
             val countdown = if (remaining < 0) "${task.title} is past due · Due $dueDate · Mark complete when finished" else "${remaining / 86_400_000}d ${(remaining / 3_600_000) % 24}h left · Due $dueDate"
             val priority = when (task.priority) { 1 -> "HIGH"; 2 -> "MED"; else -> "LOW" }
-            Text("${task.category} · $priority · $countdown", color = when { remaining < 0 -> StatusDanger; remaining < 48 * 60 * 60_000L -> StatusWarn; task.priority == 1 -> StatusDanger; task.priority == 2 -> StatusWarn; else -> TextSecondary }, fontSize = 12.sp)
+            Text("${task.category} · $priority · $countdown", color = when { remaining < 0 -> LocalCampusColors.current.statusDanger; remaining < 48 * 60 * 60_000L -> LocalCampusColors.current.statusWarning; task.priority == 1 -> LocalCampusColors.current.statusDanger; task.priority == 2 -> LocalCampusColors.current.statusWarning; else -> LocalCampusColors.current.textSecondary }, fontSize = 12.sp)
         }
     }
 }
@@ -444,18 +438,18 @@ private fun TaskRow(task: TaskEntity, onDone: () -> Unit) {
 private fun CourseSplitPane(courses: List<CourseEntity>, topics: List<SyllabusTopicEntity>, selectedId: String, onSelect: (String) -> Unit) {
     val selected = courses.firstOrNull { it.id == selectedId } ?: courses.first()
     GlassCard {
-        Text("COURSE DETAILS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        Text("COURSE DETAILS", color = LocalCampusColors.current.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(0.8f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 courses.forEach { course ->
                     Surface(
-                        color = if (course.id == selected.id) com.afraz.campusos.core.designsystem.AccentIndigo.copy(alpha = 0.22f) else SurfaceBento,
+                        color = if (course.id == selected.id) LocalCampusColors.current.accentPrimary.copy(alpha = 0.22f) else LocalCampusColors.current.surfacePrimary,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onSelect(course.id) }
                     ) {
                         Column(Modifier.padding(10.dp)) {
-                            Text(course.name, color = TextPrimary, fontWeight = FontWeight.SemiBold)
-                            Text(course.code, color = TextSecondary, fontSize = 12.sp)
+                            Text(course.name, color = LocalCampusColors.current.textPrimary, fontWeight = FontWeight.SemiBold)
+                            Text(course.code, color = LocalCampusColors.current.textSecondary, fontSize = 12.sp)
                         }
                     }
                 }
@@ -468,13 +462,13 @@ private fun CourseSplitPane(courses: List<CourseEntity>, topics: List<SyllabusTo
 @Composable
 private fun CourseDetail(course: CourseEntity, topics: List<SyllabusTopicEntity>, modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(course.name, color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Text("Professor · ${course.professor.ifBlank { "Not set" }}", color = TextSecondary)
-        Text("Room · ${course.room.ifBlank { "Not set" }}", color = TextSecondary)
+        Text(course.name, color = LocalCampusColors.current.textPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("Professor · ${course.professor.ifBlank { "Not set" }}", color = LocalCampusColors.current.textSecondary)
+        Text("Room · ${course.room.ifBlank { "Not set" }}", color = LocalCampusColors.current.textSecondary)
         val attendance = com.afraz.campusos.core.util.BunkCalculator.calculate(course.attendedClasses, course.totalClasses, course.targetPercentage)
-        Text("Attendance · ${attendance.percentage?.let { "%.1f%%".format(it) } ?: "No classes logged"} (${course.attendedClasses}/${course.totalClasses})", color = TextPrimary)
+        Text("Attendance · ${attendance.percentage?.let { "%.1f%%".format(it) } ?: "No classes logged"} (${course.attendedClasses}/${course.totalClasses})", color = LocalCampusColors.current.textPrimary)
         val progress = if (topics.isEmpty()) 0f else topics.count { it.isCompleted }.toFloat() / topics.size
-        Text("Syllabus progress · ${(progress * 100).toInt()}%", color = TextPrimary)
+        Text("Syllabus progress · ${(progress * 100).toInt()}%", color = LocalCampusColors.current.textPrimary)
         androidx.compose.material3.LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
     }
 }
@@ -488,3 +482,4 @@ private fun String.toMinutesOrNull(): Int? = runCatching {
     require(hour in 0..23 && minute in 0..59)
     hour * 60 + minute
 }.getOrNull()
+
