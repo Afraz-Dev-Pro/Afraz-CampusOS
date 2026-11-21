@@ -82,7 +82,7 @@ All app screenshots are grouped in one gallery.
 </table>
 
 ## 🎨 Themes and Customization
-
+CampusOS includes three built-in palettes that change the app's color system:
 <table>
 <tr>
     <td align="center"><img src="assets/screenshots/theme-presets.jpg" alt="Built-in theme presets" width="160" /><br /><sub>Built-in theme presets</sub></td>
@@ -90,7 +90,6 @@ All app screenshots are grouped in one gallery.
     <td align="center"><img src="assets/screenshots/theme-custom-save.jpg" alt="Save a custom theme" width="160" /><br /><sub>Save a custom theme</sub></td>
   </tr>
 </table>
-CampusOS includes three built-in palettes that change the app's color system:
 
 - **Midnight Indigo** — dark canvas with indigo accents.
 - **Crimson Parchment** — warm light palette with crimson accents.
