@@ -51,42 +51,81 @@ Download the APK from the official [V1.8A release page](https://github.com/Afraz
 
 ## 📱 App Showcase
 
-<p align="center"><strong>One app, five campus spaces.</strong><br /><sub>Real screens captured from the CampusOS Android app.</sub></p>
+Screens captured from the CampusOS Android app. The gallery covers the core destinations and their main workflows.
 
-<table align="center">
+### Today and Classes
+
+<table>
+  <tr><th>Today dashboard</th><th>Weekly timetable</th><th>Attendance</th></tr>
   <tr>
-    <th width="33%" align="center">🏠 Dashboard</th>
-    <th width="33%" align="center">📚 Academics</th>
-    <th width="33%" align="center">📈 Study Progress</th>
+    <td><img src="assets/screenshots/dashboard-today.jpg" alt="Today dashboard with next class, attendance, and deadlines" width="190" /></td>
+    <td><img src="assets/screenshots/classes-timetable.jpg" alt="Weekly class timetable and day selector" width="190" /></td>
+    <td><img src="assets/screenshots/classes-attendance.jpg" alt="Attendance tracking and course recovery guidance" width="190" /></td>
   </tr>
+  <tr><th>SGPA and target CGPA</th><th>Academic tools and PYQ vault</th><th></th></tr>
   <tr>
-    <td align="center"><img src="assets/screenshots/dashboard.png" alt="CampusOS Dashboard" width="220" /></td>
-    <td align="center"><img src="assets/screenshots/academics.png" alt="CampusOS Academics and timetable" width="220" /></td>
-    <td align="center"><img src="assets/screenshots/academics-progress.png" alt="CampusOS academic progress and tasks" width="220" /></td>
-  </tr>
-  <tr>
-    <th align="center">🧰 Toolkit</th>
-    <th align="center">🪪 Digital ID & Focus</th>
-    <th align="center">💸 Finance</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="assets/screenshots/toolkit.png" alt="CampusOS Toolkit" width="220" /></td>
-    <td align="center"><img src="assets/screenshots/toolkit-wallet-focus.png" alt="CampusOS Digital ID wallet and focus timer" width="220" /></td>
-    <td align="center"><img src="assets/screenshots/finance.png" alt="CampusOS Finance and personal spend" width="220" /></td>
-  </tr>
-  <tr>
-    <th align="center">🧾 Bill Splits</th>
-    <th align="center">🚀 HackHub</th>
-    <th align="center">🤝 Teammates</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="assets/screenshots/finance-splits.png" alt="CampusOS equal and custom bill splitting" width="220" /></td>
-    <td align="center"><img src="assets/screenshots/hackhub.png" alt="CampusOS HackHub" width="220" /></td>
-    <td align="center"><img src="assets/screenshots/hackhub-teammates.png" alt="CampusOS teammate finder" width="220" /></td>
+    <td><img src="assets/screenshots/academic-sgpa-cgpa.jpg" alt="SGPA and target CGPA calculator" width="190" /></td>
+    <td><img src="assets/screenshots/academic-pyq.jpg" alt="Academic tools with previous year papers" width="190" /></td>
+    <td></td>
   </tr>
 </table>
 
-<p align="center"><img src="assets/screenshots/about.png" alt="CampusOS About page" width="220" /><br /><sub>About CampusOS · Developed by Afraz Ahamed</sub></p>
+### Finance
+
+<table>
+  <tr><th>Expenses</th><th>Add expense</th><th>Group balances</th></tr>
+  <tr>
+    <td><img src="assets/screenshots/finance-expenses.jpg" alt="Finance expense list with edit and remove actions" width="190" /></td>
+    <td><img src="assets/screenshots/finance-add-expense.jpg" alt="Add expense sheet with amount, category, date, and note" width="190" /></td>
+    <td><img src="assets/screenshots/finance-group-splits.jpg" alt="Group split balances with settle up action" width="190" /></td>
+  </tr>
+  <tr><th>Create a bill split</th><th>Custom shares</th><th></th></tr>
+  <tr>
+    <td><img src="assets/screenshots/finance-split-create.jpg" alt="Bill split setup with people and UPI details" width="190" /></td>
+    <td><img src="assets/screenshots/finance-custom-shares.jpg" alt="Entering individual custom shares for a bill" width="190" /></td>
+    <td></td>
+  </tr>
+</table>
+
+### Toolkit and HackHub
+
+<table>
+  <tr><th>Study and PDF tools</th><th>Focus timer and campus wallet</th><th>Teammates</th></tr>
+  <tr>
+    <td><img src="assets/screenshots/toolkit-study.jpg" alt="Document scanner and native PDF maker" width="190" /></td>
+    <td><img src="assets/screenshots/toolkit-focus-wallet.jpg" alt="Pomodoro timer and digital ID wallet" width="190" /></td>
+    <td><img src="assets/screenshots/hackhub-teammates.jpg" alt="HackHub teammate discovery" width="190" /></td>
+  </tr>
+  <tr><th>Hackathons and bounties</th><th></th><th></th></tr>
+  <tr>
+    <td><img src="assets/screenshots/hackhub-events.jpg" alt="HackHub hackathons and sponsor bounties" width="190" /></td>
+    <td></td><td></td>
+  </tr>
+</table>
+
+## 🎨 Themes and Customization
+
+CampusOS includes three built-in palettes that change the app's color system:
+
+- **Midnight Indigo** — dark canvas with indigo accents.
+- **Crimson Parchment** — warm light palette with crimson accents.
+- **Espresso Parchment** — warm light palette with espresso hero surfaces.
+
+Open Theme Studio from the palette button in the top bar. Selecting a preset applies it across the app and saves the choice for the next launch.
+
+### Custom Hex Theme Studio
+
+Create and save a personal palette in **Custom Hex**. Customize the canvas, card surface, hero card, primary accent, primary and secondary text, and borders. Each color has a live preview, hue control, quick swatches, and a validated hex field supporting `#RRGGBB` and `#AARRGGBB`. Changes preview across the app as you edit; save a named theme to keep it in the preset list, or reset the palette to defaults. Status-bar icon contrast follows the selected palette luminance, with a manual override.
+
+<table>
+  <tr><th>Built-in theme presets</th><th>Custom Hex color editing</th><th>Save a custom theme</th></tr>
+  <tr>
+    <td><img src="assets/screenshots/theme-presets.jpg" alt="Midnight Indigo, Crimson Parchment, and Espresso Parchment presets" width="190" /></td>
+    <td><img src="assets/screenshots/theme-custom-hex.jpg" alt="Custom Hex Studio with editable theme color tokens" width="190" /></td>
+    <td><img src="assets/screenshots/theme-custom-save.jpg" alt="Custom theme name, status bar contrast, reset, and save controls" width="190" /></td>
+  </tr>
+</table>
+
 ---
 
 ## ✨ What you can do
