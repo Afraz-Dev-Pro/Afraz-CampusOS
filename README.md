@@ -51,33 +51,66 @@ Download the APK from the official [V1.8A release page](https://github.com/Afraz
 
 ## 📱 App Screenshots
 
-All app screenshots are grouped in one gallery.
-
 <table align="center">
   <tr>
-    <td align="center"><img src="assets/screenshots/dashboard-today.jpg" alt="Today dashboard" width="160" /><br /><sub>Today dashboard</sub></td>
-    <td align="center"><img src="assets/screenshots/classes-timetable.jpg" alt="Weekly timetable" width="160" /><br /><sub>Weekly timetable</sub></td>
-    <td align="center"><img src="assets/screenshots/classes-attendance.jpg" alt="Attendance tracker" width="160" /><br /><sub>Attendance tracker</sub></td>
+    <th width="33%" align="center">Today dashboard</th>
+    <th width="33%" align="center">Weekly timetable</th>
+    <th width="33%" align="center">Attendance tracker</th>
   </tr>
   <tr>
-    <td align="center"><img src="assets/screenshots/classes-assignments-syllabus.jpg" alt="Assignments and syllabus progress" width="160" /><br /><sub>Assignments and syllabus progress</sub></td>
-    <td align="center"><img src="assets/screenshots/academic-sgpa-cgpa.jpg" alt="SGPA and target CGPA" width="160" /><br /><sub>SGPA and target CGPA</sub></td>
-    <td align="center"><img src="assets/screenshots/academic-pyq.jpg" alt="Academic tools and previous year papers" width="160" /><br /><sub>Academic tools and previous year papers</sub></td>
+    <td align="center"><img src="assets/screenshots/dashboard-today.jpg" alt="Today dashboard" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/classes-timetable.jpg" alt="Weekly timetable" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/classes-attendance.jpg" alt="Attendance tracker" width="160" /></td>
   </tr>
   <tr>
-    <td align="center"><img src="assets/screenshots/finance-expenses.jpg" alt="Expenses with edit and remove actions" width="160" /><br /><sub>Expenses with edit and remove actions</sub></td>
-    <td align="center"><img src="assets/screenshots/finance-add-expense.jpg" alt="Add expense" width="160" /><br /><sub>Add expense</sub></td>
-    <td align="center"><img src="assets/screenshots/finance-group-splits.jpg" alt="Group split balances and UPI settlement" width="160" /><br /><sub>Group split balances and UPI settlement</sub></td>
+    <th width="33%" align="center">Assignments and syllabus</th>
+    <th width="33%" align="center">SGPA and target CGPA</th>
+    <th width="33%" align="center">Previous papers</th>
   </tr>
   <tr>
-    <td align="center"><img src="assets/screenshots/finance-split-create.jpg" alt="Create a bill split" width="160" /><br /><sub>Create a bill split</sub></td>
-    <td align="center"><img src="assets/screenshots/finance-custom-shares.jpg" alt="Custom shares" width="160" /><br /><sub>Custom shares</sub></td>
-    <td align="center"><img src="assets/screenshots/toolkit-study.jpg" alt="Study and PDF tools" width="160" /><br /><sub>Study and PDF tools</sub></td>
+    <td align="center"><img src="assets/screenshots/classes-assignments-syllabus.jpg" alt="Assignments and syllabus progress" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/academic-sgpa-cgpa.jpg" alt="SGPA and target CGPA" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/academic-pyq.jpg" alt="Academic tools and previous year papers" width="160" /></td>
   </tr>
   <tr>
-    <td align="center"><img src="assets/screenshots/toolkit-focus-wallet.jpg" alt="Focus timer and campus wallet" width="160" /><br /><sub>Focus timer and campus wallet</sub></td>
-    <td align="center"><img src="assets/screenshots/hackhub-teammates.jpg" alt="Teammate finder" width="160" /><br /><sub>Teammate finder</sub></td>
-    <td align="center"><img src="assets/screenshots/hackhub-events.jpg" alt="Hackathons and bounties" width="160" /><br /><sub>Hackathons and bounties</sub></td>
+    <th width="33%" align="center">Expenses</th>
+    <th width="33%" align="center">Add expense</th>
+    <th width="33%" align="center">Balances and UPI settlement</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="assets/screenshots/finance-expenses.jpg" alt="Expenses with edit and remove actions" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/finance-add-expense.jpg" alt="Add expense" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/finance-group-splits.jpg" alt="Group split balances and UPI settlement" width="160" /></td>
+  </tr>
+  <tr>
+    <th width="33%" align="center">Split a bill</th>
+    <th width="33%" align="center">Custom shares</th>
+    <th width="33%" align="center">Study and PDF tools</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="assets/screenshots/finance-split-create.jpg" alt="Create a bill split" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/finance-custom-shares.jpg" alt="Custom shares" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/toolkit-study.jpg" alt="Study and PDF tools" width="160" /></td>
+  </tr>
+  <tr>
+    <th width="33%" align="center">Focus and campus wallet</th>
+    <th width="33%" align="center">Teammate finder</th>
+    <th width="33%" align="center">Hackathons and bounties</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="assets/screenshots/toolkit-focus-wallet.jpg" alt="Focus timer and campus wallet" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/hackhub-teammates.jpg" alt="Teammate finder" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/hackhub-events.jpg" alt="Hackathons and bounties" width="160" /></td>
+  </tr>
+  <tr>
+    <th width="33%" align="center">Built-in themes</th>
+    <th width="33%" align="center">Custom Hex Studio</th>
+    <th width="33%" align="center">Save a custom theme</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="assets/screenshots/theme-presets.jpg" alt="Built-in theme presets" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/theme-custom-hex.jpg" alt="Custom Hex color editing" width="160" /></td>
+    <td align="center"><img src="assets/screenshots/theme-custom-save.jpg" alt="Save a custom theme" width="160" /></td>
   </tr>
 </table>
 
