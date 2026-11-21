@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,6 +81,7 @@ fun HomeScreen(
     onOpenFinance: () -> Unit,
     onOpenTools: () -> Unit,
     onOpenScanner: () -> Unit,
+    onOpenThemeStudio: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -100,6 +102,7 @@ fun HomeScreen(
         onOpenFinance = onOpenFinance,
         onOpenTools = onOpenTools,
         onOpenScanner = onOpenScanner,
+        onOpenThemeStudio = onOpenThemeStudio,
         onDismissBatteryNotice = viewModel::dismissBatteryNotice,
         onOpenBatterySettings = {
             try {
@@ -121,6 +124,7 @@ private fun HomeScreenContent(
     onOpenFinance: () -> Unit,
     onOpenTools: () -> Unit,
     onOpenScanner: () -> Unit,
+    onOpenThemeStudio: () -> Unit,
     onDismissBatteryNotice: () -> Unit,
     onOpenBatterySettings: () -> Unit
 ) {
@@ -150,6 +154,12 @@ private fun HomeScreenContent(
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text("Today", color = LocalCampusColors.current.textPrimary, fontSize = 25.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.weight(1f))
+                        IconButton(
+                            onClick = onOpenThemeStudio,
+                            modifier = Modifier.size(48.dp).clip(CircleShape).background(LocalCampusColors.current.surfacePrimary)
+                        ) {
+                            Icon(Icons.Outlined.Palette, contentDescription = "Open theme studio", tint = LocalCampusColors.current.accentPrimary)
+                        }
                         IconButton(
                             onClick = onOpenProfile,
                             modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer)
@@ -443,7 +453,7 @@ private fun HomeStatePreviewToggles() {
                 Button(onClick = { populated = true }) { Text("Populated State") }
                 OutlinedButton(onClick = { populated = false }) { Text("Empty First-Run State") }
             }
-            HomeScreenContent(sampleState, now, {}, {}, {}, {}, {}, {}, {}, {})
+            HomeScreenContent(sampleState, now, {}, {}, {}, {}, {}, {}, {}, {}, {})
         }
     }
 }

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.School
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,10 +35,14 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,6 +65,8 @@ import com.afraz.campusos.navigation.CampusRoute
 import com.afraz.campusos.ui.theme.CampusOsTheme
 import com.afraz.campusos.ui.theme.LocalCampusColors
 import com.afraz.campusos.ui.theme.ThemeViewModel
+import com.afraz.campusos.ui.theme.ThemeStudioSheet
+import com.afraz.campusos.ui.theme.CampusPalettes
 import androidx.compose.runtime.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -91,7 +98,8 @@ class MainActivity : ComponentActivity() {
                 CampusNavScaffold(
                     openScannerRequest = openScannerRequest.value,
                     onScannerConsumed = { openScannerRequest.value = false },
-                    onScannerRequested = { openScannerRequest.value = true }
+                    onScannerRequested = { openScannerRequest.value = true },
+                    themeViewModel = themeViewModel
                 )
             }
         }
@@ -116,9 +124,13 @@ private data class CampusDestination(
 private fun CampusNavScaffold(
     openScannerRequest: Boolean,
     onScannerConsumed: () -> Unit,
-    onScannerRequested: () -> Unit
+    onScannerRequested: () -> Unit,
+    themeViewModel: ThemeViewModel
 ) {
     val colors = LocalCampusColors.current
+    val selectedPalette by themeViewModel.selectedPalette.collectAsState()
+    val savedCustom by themeViewModel.savedCustomPalettes.collectAsState()
+    var themeStudioOpen by remember { mutableStateOf(false) }
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route.orEmpty()
@@ -142,7 +154,7 @@ private fun CampusNavScaffold(
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             topBar = {
-                if (isAboutPage) {
+                if (!currentRoute.substringAfterLast('.').startsWith("Dashboard")) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -150,10 +162,23 @@ private fun CampusNavScaffold(
                             .padding(horizontal = 12.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+                        if (isAboutPage) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+                            }
+                            Text("About CampusOS", fontSize = 16.sp, modifier = Modifier.weight(1f))
+                        } else {
+                            Text(destinations.firstOrNull { isSelected(currentRoute, it.route) }?.label ?: "CampusOS", fontSize = 16.sp, modifier = Modifier.weight(1f))
                         }
-                        Text("About CampusOS", fontSize = 16.sp)
+                        Surface(
+                            color = colors.surfacePrimary,
+                            shape = RoundedCornerShape(14.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
+                        ) {
+                            IconButton(onClick = { themeStudioOpen = true }, modifier = Modifier.size(48.dp)) {
+                                Icon(Icons.Outlined.Palette, contentDescription = "Open theme studio", tint = colors.accentPrimary)
+                            }
+                        }
                     }
                 }
             },
@@ -232,7 +257,8 @@ private fun CampusNavScaffold(
                             onOpenScanner = {
                                 navController.navigateTo(CampusRoute.Toolkit)
                                 onScannerRequested()
-                            }
+                            },
+                            onOpenThemeStudio = { themeStudioOpen = true }
                         )
                     }
                     composable<CampusRoute.Academics> { AcademicsScreen() }
@@ -248,6 +274,26 @@ private fun CampusNavScaffold(
                     composable<CampusRoute.About> { AboutScreen() }
                 }
             }
+        }
+        if (themeStudioOpen) {
+            ThemeStudioSheet(
+                selected = selectedPalette,
+                savedCustom = savedCustom,
+                onSelect = { palette ->
+                    themeViewModel.selectPalette(palette.id)
+                    themeStudioOpen = false
+                },
+                onPreview = themeViewModel::previewPalette,
+                onSave = { palette ->
+                    themeViewModel.saveCustomPalette(palette)
+                    themeStudioOpen = false
+                },
+                onReset = { themeViewModel.selectPalette(CampusPalettes.default.id) },
+                onDismiss = {
+                    themeViewModel.discardPreview()
+                    themeStudioOpen = false
+                }
+            )
         }
     }
 }
