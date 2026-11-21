@@ -59,14 +59,14 @@ fun AboutScreen(modifier: Modifier = Modifier) {
                 title = "GitHub",
                 subtitle = "@Afraz-Dev-Pro",
                 enabled = true,
-                icon = { Icon(Icons.Outlined.Code, contentDescription = null, tint = AccentIndigo) },
+                icon = { Icon(Icons.Outlined.Code, contentDescription = "Source code", tint = AccentIndigo) },
                 onClick = { openProfile(context, GITHUB_PROFILE_URL) }
             )
             SocialLink(
                 title = "LinkedIn",
                 subtitle = if (LINKEDIN_PROFILE_URL.isBlank()) "Profile link will be added" else "Afraz Ahamed",
                 enabled = LINKEDIN_PROFILE_URL.isNotBlank(),
-                icon = { Icon(Icons.Outlined.WorkOutline, contentDescription = null, tint = AccentIndigo) },
+                icon = { Icon(Icons.Outlined.WorkOutline, contentDescription = "Project information", tint = AccentIndigo) },
                 onClick = { if (LINKEDIN_PROFILE_URL.isNotBlank()) openProfile(context, LINKEDIN_PROFILE_URL) }
             )
         }

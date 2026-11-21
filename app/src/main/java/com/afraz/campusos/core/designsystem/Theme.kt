@@ -4,7 +4,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 private val CampusColors = darkColorScheme(
     primary = AccentIndigo,
@@ -12,7 +11,7 @@ private val CampusColors = darkColorScheme(
     background = BgCanvas,
     surface = SurfaceBento,
     surfaceVariant = SurfaceElevated,
-    onPrimary = Color.White,
+    onPrimary = TextPrimary,
     onBackground = TextPrimary,
     onSurface = TextPrimary,
     onSurfaceVariant = TextSecondary,
