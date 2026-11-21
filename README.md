@@ -83,6 +83,10 @@ All app screenshots are grouped in one gallery.
 
 ## 🎨 Themes and Customization
 CampusOS includes three built-in palettes that change the app's color system:
+
+- **Midnight Indigo** — dark canvas with indigo accents.
+- **Crimson Parchment** — warm light palette with crimson accents.
+- **Espresso Parchment** — warm light palette with espresso hero surfaces.
 <table>
 <tr>
     <td align="center"><img src="assets/screenshots/theme-presets.jpg" alt="Built-in theme presets" width="160" /><br /><sub>Built-in theme presets</sub></td>
@@ -91,9 +95,6 @@ CampusOS includes three built-in palettes that change the app's color system:
   </tr>
 </table>
 
-- **Midnight Indigo** — dark canvas with indigo accents.
-- **Crimson Parchment** — warm light palette with crimson accents.
-- **Espresso Parchment** — warm light palette with espresso hero surfaces.
 
 Open Theme Studio from the palette button in the top bar. Selecting a preset applies it across the app and saves the choice for the next launch.
 
