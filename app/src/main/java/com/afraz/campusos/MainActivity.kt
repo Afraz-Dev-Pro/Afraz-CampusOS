@@ -55,7 +55,7 @@ import com.afraz.campusos.core.designsystem.GlassBorderTop
 import com.afraz.campusos.core.designsystem.GlassFill
 import com.afraz.campusos.feature_academics.AcademicsScreen
 import com.afraz.campusos.feature_dashboard.AboutScreen
-import com.afraz.campusos.feature_dashboard.DashboardScreen
+import com.afraz.campusos.feature_dashboard.HomeScreen
 import com.afraz.campusos.feature_hackhub.HackHubScreen
 import com.afraz.campusos.feature_toolkit.FinanceScreen
 import com.afraz.campusos.feature_toolkit.ToolkitScreen
@@ -223,15 +223,16 @@ private fun CampusNavScaffold(
                     modifier = Modifier.weight(1f)
                 ) {
                     composable<CampusRoute.Dashboard> {
-                        DashboardScreen(
-                            onOpenToolkit = { navController.navigateTo(CampusRoute.Toolkit) },
+                        HomeScreen(
+                            onOpenClasses = { navController.navigateTo(CampusRoute.Academics) },
+                            onOpenImport = { navController.navigateTo(CampusRoute.Academics) },
+                            onOpenProfile = { navController.navigateTo(CampusRoute.About) },
+                            onOpenFinance = { navController.navigateTo(CampusRoute.Finance) },
+                            onOpenTools = { navController.navigateTo(CampusRoute.Toolkit) },
                             onOpenScanner = {
                                 navController.navigateTo(CampusRoute.Toolkit)
                                 onScannerRequested()
-                            },
-                            onOpenAcademics = { navController.navigateTo(CampusRoute.Academics) },
-                            onOpenFinance = { navController.navigateTo(CampusRoute.Finance) },
-                            onOpenDigitalId = { navController.navigateTo(CampusRoute.DigitalId) }
+                            }
                         )
                     }
                     composable<CampusRoute.Academics> { AcademicsScreen() }
