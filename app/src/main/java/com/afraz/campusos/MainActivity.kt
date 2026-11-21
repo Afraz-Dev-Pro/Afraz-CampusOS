@@ -58,7 +58,7 @@ import com.afraz.campusos.feature_dashboard.AboutScreen
 import com.afraz.campusos.feature_dashboard.HomeScreen
 import com.afraz.campusos.feature_hackhub.HackHubScreen
 import com.afraz.campusos.feature_toolkit.FinanceScreen
-import com.afraz.campusos.feature_toolkit.ToolkitScreen
+import com.afraz.campusos.feature_toolkit.ToolsScreen
 import com.afraz.campusos.feature_toolkit.tile.QuickScanTileService
 import com.afraz.campusos.navigation.CampusRoute
 import com.afraz.campusos.ui.theme.CampusOsTheme
@@ -177,7 +177,7 @@ private fun CampusNavScaffold(
                                     icon = {
                                         Icon(
                                             destination.icon,
-                                            contentDescription = null,
+                                            contentDescription = destination.label,
                                             modifier = Modifier.size(24.dp)
                                         )
                                     },
@@ -209,7 +209,7 @@ private fun CampusNavScaffold(
                                 selected = isSelected(currentRoute, destination.route),
                                 onClick = { navController.navigateTo(destination.route) },
                                 icon = {
-                                    Icon(destination.icon, contentDescription = null)
+                                    Icon(destination.icon, contentDescription = destination.label)
                                 },
                                 label = { Text(destination.label, maxLines = 1, softWrap = false) },
                                 alwaysShowLabel = true
@@ -237,14 +237,14 @@ private fun CampusNavScaffold(
                     }
                     composable<CampusRoute.Academics> { AcademicsScreen() }
                     composable<CampusRoute.Toolkit> {
-                        ToolkitScreen(
+                        ToolsScreen(
                             autoStartScanner = openScannerRequest,
                             onAutoStartConsumed = onScannerConsumed
                         )
                     }
                     composable<CampusRoute.HackHub> { HackHubScreen() }
                     composable<CampusRoute.Finance> { FinanceScreen() }
-                    composable<CampusRoute.DigitalId> { ToolkitScreen(walletOnly = true) }
+                    composable<CampusRoute.DigitalId> { ToolsScreen(walletOnly = true) }
                     composable<CampusRoute.About> { AboutScreen() }
                 }
             }

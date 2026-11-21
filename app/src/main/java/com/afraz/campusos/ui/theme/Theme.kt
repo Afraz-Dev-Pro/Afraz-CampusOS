@@ -4,7 +4,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import android.animation.ValueAnimator
+
+val LocalMotionEnabled = staticCompositionLocalOf { true }
 
 private val CampusColorScheme = darkColorScheme(
     primary = AccentIndigo,
@@ -12,7 +16,7 @@ private val CampusColorScheme = darkColorScheme(
     background = BgCanvas,
     surface = SurfaceBento,
     surfaceVariant = SurfaceElevated,
-    onPrimary = Color.White,
+    onPrimary = TextPrimary,
     onBackground = TextPrimary,
     onSurface = TextPrimary,
     onSurfaceVariant = TextSecondary,
@@ -22,10 +26,13 @@ private val CampusColorScheme = darkColorScheme(
 @Composable
 fun CampusOsTheme(content: @Composable () -> Unit) {
     isSystemInDarkTheme()
-    MaterialTheme(
-        colorScheme = CampusColorScheme,
-        typography = CampusTypography,
-        shapes = CampusShapes,
-        content = content
-    )
+    CompositionLocalProvider(LocalMotionEnabled provides ValueAnimator.areAnimatorsEnabled()) {
+        MaterialTheme(
+            colorScheme = CampusColorScheme,
+            typography = CampusTypography,
+            shapes = CampusShapes,
+            content = content
+        )
+    }
 }
+

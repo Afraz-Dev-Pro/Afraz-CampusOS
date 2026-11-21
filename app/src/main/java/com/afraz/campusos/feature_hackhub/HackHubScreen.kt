@@ -6,8 +6,10 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,7 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,16 +60,29 @@ private val skillTags = listOf("Kotlin", "Compose", "Python", "C++", "Web", "AI/
 fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val activity = remember(context) { context.findActivity() }
-    val state by viewModel.state.collectAsState()
-    val backupPicker = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri -> uri?.let(viewModel::exportBackup) }
-    val restorePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(viewModel::restoreBackup) }
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                HackHubEvent.ExportBackup -> backupPicker.launch("campusos_backup_v1.json")
+    val connectivityManager = remember(context) { context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
+    var online by remember {
+        androidx.compose.runtime.mutableStateOf(
+            connectivityManager.activeNetwork?.let(connectivityManager::getNetworkCapabilities)
+                ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true
+        )
+    }
+    DisposableEffect(connectivityManager) {
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) { online = true }
+            override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+                online = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            }
+            override fun onLost(network: Network) {
+                online = connectivityManager.activeNetwork?.let(connectivityManager::getNetworkCapabilities)
+                    ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true
             }
         }
+        connectivityManager.registerNetworkCallback(NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(), callback)
+        onDispose { connectivityManager.unregisterNetworkCallback(callback) }
     }
+    val state by viewModel.state.collectAsState()
+    var selectedView by remember { mutableStateOf("Teammates") }
     var author by remember { mutableStateOf("") }
     var college by remember { mutableStateOf("") }
     var pitch by remember { mutableStateOf("") }
@@ -79,8 +95,16 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
             Spacer(Modifier.height(16.dp))
             Text("HackHub", color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Text("Find teammates, events and past papers.", color = TextSecondary)
+            Text(if (online) "Online · Community and feeds available" else "Offline · Showing cached items", color = TextSecondary, modifier = Modifier.padding(top = 8.dp))
         }
         item {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("Teammates", "Hackathons & Bounties", "Previous Papers").forEach { view ->
+                    Button(onClick = { selectedView = view }, modifier = Modifier.heightIn(min = 48.dp)) { Text(if (selectedView == view) "✓ $view" else view) }
+                }
+            }
+        }
+        if (selectedView == "Hackathons & Bounties") item {
             GlassCard {
                 Text("HACKATHONS & SPONSOR BOUNTIES", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 if (state.usingSeedData) Text("Showing bundled starter events · remote feed will replace these when available", color = TextSecondary, fontSize = 12.sp)
@@ -96,7 +120,7 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
                 }
             }
         }
-        item {
+        if (selectedView == "Teammates") item {
             GlassCard {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("TEAMMATE REQUESTS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
@@ -118,12 +142,17 @@ fun HackHubScreen(modifier: Modifier = Modifier, viewModel: HackHubViewModel = h
                 Button(onClick = viewModel::loadMore, enabled = state.teammatePosts.isNotEmpty() && !state.loadingMore) { Text(if (state.loadingMore) "Loading…" else "Load more") }
             }
         }
-        item {
+        if (selectedView == "Previous Papers") item {
             GlassCard {
-                Text("BACKUP & RESTORE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Export or restore all 11 local tables through the Android file picker. Choose Google Drive there to store a copy.", color = TextPrimary)
-                Button(onClick = viewModel::requestBackup) { Text("Cloud Backup / Export") }
-                Button(onClick = { restorePicker.launch(arrayOf("application/json", "application/gzip", "application/octet-stream")) }) { Text("Restore from file") }
+                Text("PREVIOUS PAPERS", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                if (state.pyqs.isEmpty()) Text("No previous papers are available in the cached feed yet.", color = TextSecondary)
+                state.pyqs.forEach { paper ->
+                    Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                        Text(paper.subjectName, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                        Text("${paper.courseCode} · Semester ${paper.semester} · ${paper.year}", color = TextSecondary)
+                        Button(onClick = { openExternal(context, paper.pdfUrl) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Open paper") }
+                    }
+                }
             }
         }
         state.error?.let { error -> item { Text(error, color = androidx.compose.material3.MaterialTheme.colorScheme.error) } }
@@ -201,3 +230,4 @@ private fun Context.findActivity(): Activity = when (this) {
     is ContextWrapper -> baseContext.findActivity()
     else -> error("An Activity context is required")
 }
+
