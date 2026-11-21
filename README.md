@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A"><img src="https://img.shields.io/badge/Release-V1.4A-6366F1?style=for-the-badge&logo=android&logoColor=white" alt="CampusOS V1.4A release" /></a>
+  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.8A"><img src="https://img.shields.io/badge/Release-V1.8A-6366F1?style=for-the-badge&logo=android&logoColor=white" alt="CampusOS V1.8A release" /></a>
   <a href="https://developer.android.com/"><img src="https://img.shields.io/badge/Android-8.0%2B%20(API%2026)-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android 8.0 and newer" /></a>
   <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin 2.0.21" /></a>
   <a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose and Material 3" /></a>
@@ -28,24 +28,24 @@
 
 CampusOS brings the tools students reach for every day into one thoughtfully designed, offline-first Android experience. See what is next, keep your timetable close, track your progress, and get back to the work that matters.
 
-> **Current build:** v1.1.3 · `com.afraz.campusos` · version code `5`  
-> **Published release:** [CampusOS V1.4A](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A) · [Download APK](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/download/V1.4A/Afraz.CampusOS.V1.4A.apk)
+> **Current build:** v1.1.4 · `com.afraz.campusos` · version code `6`  
+> **Published release:** [CampusOS V1.8A](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.8A) · [Download APK](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/download/V1.8A/CampusOS.V1.8A.apk)
 
 ---
 
 ## 📥 Download CampusOS for Android
 
 <p align="center">
-  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A">
-    <img src="https://img.shields.io/badge/Download%20CampusOS-V1.4A-635BEB?style=for-the-badge&logo=android&logoColor=white" alt="Download CampusOS V1.4A" />
+  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.8A">
+    <img src="https://img.shields.io/badge/Download%20CampusOS-V1.8A-635BEB?style=for-the-badge&logo=android&logoColor=white" alt="Download CampusOS V1.8A" />
   </a>
   &nbsp;
-  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/download/V1.4A/Afraz.CampusOS.V1.4A.apk">
-    <img src="https://img.shields.io/badge/Direct%20APK-Install%20on%20Android-16A085?style=for-the-badge&logo=github&logoColor=white" alt="Download the V1.4A APK" />
+  <a href="https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/download/V1.8A/CampusOS.V1.8A.apk">
+    <img src="https://img.shields.io/badge/Direct%20APK-Install%20on%20Android-16A085?style=for-the-badge&logo=github&logoColor=white" alt="Download the V1.8A APK" />
   </a>
 </p>
 
-Download the APK from the official [V1.4A release page](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.4A), then open it on your Android phone and follow the installer prompts. Android may ask you to allow installs from the browser or file manager you used. Only install APKs you trust.
+Download the APK from the official [V1.8A release page](https://github.com/Afraz-Dev-Pro/Afraz-CampusOS/releases/tag/V1.8A), then open it on your Android phone and follow the installer prompts. Android may ask you to allow installs from the browser or file manager you used. Only install APKs you trust.
 
 ---
 
