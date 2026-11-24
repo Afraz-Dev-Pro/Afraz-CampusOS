@@ -7,5 +7,6 @@ local.properties
 .idea/
 *.iml
 *.log
+!activity.log
 Thumbs.db
 .DS_Store
